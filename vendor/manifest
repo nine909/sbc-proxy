@@ -2,6 +2,12 @@
 	"version": 0,
 	"dependencies": [
 		{
+			"importpath": "github.com/julienschmidt/httprouter",
+			"repository": "https://github.com/julienschmidt/httprouter",
+			"revision": "8a45e95fc75cb77048068a62daed98cc22fdac7c",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/pixelbender/go-stun",
 			"repository": "https://github.com/pixelbender/go-stun",
 			"revision": "0b7811ed3bc852c024c91e052179c2d5f9812049",
