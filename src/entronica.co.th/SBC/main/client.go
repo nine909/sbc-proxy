@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	addr, err := stun.Lookup("stun:127.0.0.1:6060", "username", "password")
+	addr, err := stun.Lookup("stun:127.0.0.1:6006", "username", "password")
 	if err != nil {
 		fmt.Println(err)
 	} else {

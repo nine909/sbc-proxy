@@ -1,4 +1,4 @@
-package main
+package stunSBC
 
 import (
 	"fmt"
@@ -7,13 +7,15 @@ import (
 	"github.com/pixelbender/go-stun/stun"
 )
 
-func main() {
+func ServerListener(port string) {
 	srv := stun.NewServer(nil)
-	l, err := net.ListenPacket("udp", ":6060")
+	p := ":" + port
+	fmt.Println(p)
+	l, err := net.ListenPacket("udp", p)
 	if err != nil {
 		fmt.Print("listen error", err)
 	}
 	defer l.Close()
-	srv.ServePacket(l)
+	go srv.ServePacket(l)
 
 }
