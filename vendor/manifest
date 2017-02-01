@@ -1,0 +1,11 @@
+{
+	"version": 0,
+	"dependencies": [
+		{
+			"importpath": "github.com/pixelbender/go-stun",
+			"repository": "https://github.com/pixelbender/go-stun",
+			"revision": "0b7811ed3bc852c024c91e052179c2d5f9812049",
+			"branch": "master"
+		}
+	]
+}
