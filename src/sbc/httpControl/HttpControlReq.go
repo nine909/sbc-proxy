@@ -27,7 +27,7 @@ func Hello(w http.ResponseWriter, r *http.Request, session sessions.Session, ps 
 
 	fmt.Fprintf(w, "hello, %s!\n", ps["portgu"])
 
-	go stunSBC.ServerListener(ps.ByName("portgu"))
+	go stunSBC.ServerListener(ps["portgu"])
 
 }
 
