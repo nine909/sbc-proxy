@@ -7,40 +7,45 @@ import (
 	"net/http"
 
 	//	"entronica.co.th/SBC/stunSBC"
-	"github.com/julienschmidt/httprouter"
+	//	"github.com/julienschmidt/httprouter"
+	"github.com/martini-contrib/sessions"
 )
 
 type test_struct struct {
 	Test string
 }
 
-func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func Index(w http.ResponseWriter, r *http.Request, session sessions.Session) {
 
 	fmt.Fprintln(w, "Welcomess!\n")
 	//	stunSBC.ServerListener("6006")
 	//	fmt.Fprintln(w, r)
 }
 
-func Hello(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	fmt.Fprintf(w, "hello, %s!\n", ps.ByName("name"))
+func Hello(w http.ResponseWriter, r *http.Request, session sessions.Session) {
+
+	fmt.Fprintf(w, "hello, %s!\n", ps.ByName("portgu"))
+
+	go stunSBC.ServerListener(ps.ByName("portgu"))
+
 }
 
-func Getuser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func Getuser(w http.ResponseWriter, r *http.Request, session sessions.Session) {
 	uid := ps.ByName("uid")
 	fmt.Fprintf(w, "you are get user %s", uid)
 }
 
-func modifyuser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func modifyuser(w http.ResponseWriter, r *http.Request, session sessions.Session) {
 	uid := ps.ByName("uid")
 	fmt.Fprintf(w, "you are modify user %s", uid)
 }
 
-func deleteuser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func deleteuser(w http.ResponseWriter, r *http.Request, session sessions.Session) {
 	uid := ps.ByName("uid")
 	fmt.Fprintf(w, "you are delete user %s", uid)
 }
 
-func Adduser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func Adduser(w http.ResponseWriter, r *http.Request, session sessions.Session) {
 	// uid := r.FormValue("uid")
 	//	uid := ps.ByName("uid")
 	//	fmt.Println(r.))
