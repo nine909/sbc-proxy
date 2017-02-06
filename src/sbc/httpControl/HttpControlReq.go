@@ -8,6 +8,7 @@ import (
 
 	//	"entronica.co.th/SBC/stunSBC"
 	//	"github.com/julienschmidt/httprouter"
+	"github.com/go-martini/martini"
 	"github.com/martini-contrib/sessions"
 )
 
@@ -22,30 +23,30 @@ func Index(w http.ResponseWriter, r *http.Request, session sessions.Session) {
 	//	fmt.Fprintln(w, r)
 }
 
-func Hello(w http.ResponseWriter, r *http.Request, session sessions.Session) {
+func Hello(w http.ResponseWriter, r *http.Request, session sessions.Session, ps martini.Params) {
 
-	fmt.Fprintf(w, "hello, %s!\n", ps.ByName("portgu"))
+	fmt.Fprintf(w, "hello, %s!\n", ps["portgu"])
 
 	go stunSBC.ServerListener(ps.ByName("portgu"))
 
 }
 
-func Getuser(w http.ResponseWriter, r *http.Request, session sessions.Session) {
-	uid := ps.ByName("uid")
+func Getuser(w http.ResponseWriter, r *http.Request, session sessions.Session, ps martini.Params) {
+	uid := ps["uid"]
 	fmt.Fprintf(w, "you are get user %s", uid)
 }
 
-func modifyuser(w http.ResponseWriter, r *http.Request, session sessions.Session) {
-	uid := ps.ByName("uid")
+func modifyuser(w http.ResponseWriter, r *http.Request, session sessions.Session, ps martini.Params) {
+	uid := ps["uid"]
 	fmt.Fprintf(w, "you are modify user %s", uid)
 }
 
-func deleteuser(w http.ResponseWriter, r *http.Request, session sessions.Session) {
-	uid := ps.ByName("uid")
+func deleteuser(w http.ResponseWriter, r *http.Request, session sessions.Session, ps martini.Params) {
+	uid := ps["uid"]
 	fmt.Fprintf(w, "you are delete user %s", uid)
 }
 
-func Adduser(w http.ResponseWriter, r *http.Request, session sessions.Session) {
+func Adduser(w http.ResponseWriter, r *http.Request, session sessions.Session, ps martini.Params) {
 	// uid := r.FormValue("uid")
 	//	uid := ps.ByName("uid")
 	//	fmt.Println(r.))
