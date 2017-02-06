@@ -17,7 +17,7 @@ type test_struct struct {
 func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 	fmt.Fprintln(w, "Welcomess!\n")
-	//	stunSBC.ServerListener("6006")
+	//	go stunSBC.ServerListener("6006")
 	//	fmt.Fprintln(w, r)
 }
 

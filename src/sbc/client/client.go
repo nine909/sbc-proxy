@@ -2,15 +2,37 @@ package main
 
 import (
 	"fmt"
-
-	"github.com/pixelbender/go-stun/stun"
+	"net"
+	"strconv"
+	"time"
 )
 
-func main() {
-	addr, err := stun.Lookup("stun:127.0.0.1:6006", "username", "password")
+func CheckError(err error) {
 	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Println(addr)
+		fmt.Println("Error: ", err)
+	}
+}
+
+func main() {
+	ServerAddr, err := net.ResolveUDPAddr("udp", "127.0.0.1:8080")
+	CheckError(err)
+
+	LocalAddr, err := net.ResolveUDPAddr("udp", "127.0.0.1:0")
+	CheckError(err)
+
+	Conn, err := net.DialUDP("udp", LocalAddr, ServerAddr)
+	CheckError(err)
+
+	defer Conn.Close()
+	i := 0
+	for {
+		msg := strconv.Itoa(i)
+		i++
+		buf := []byte(msg)
+		_, err := Conn.Write(buf)
+		if err != nil {
+			fmt.Println(msg, err)
+		}
+		time.Sleep(time.Second * 1)
 	}
 }

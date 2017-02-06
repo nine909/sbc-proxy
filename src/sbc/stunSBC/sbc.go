@@ -11,11 +11,13 @@ func ServerListener(port string) {
 	srv := stun.NewServer(nil)
 	p := ":" + port
 	fmt.Println(p)
-	l, err := net.ListenPacket("udp", p)
+	protocol := "udp"
+	l, err := net.ListenPacket(protocol, p)
 	if err != nil {
 		fmt.Print("listen error", err)
 	}
+
 	defer l.Close()
-	go srv.ServePacket(l)
+	srv.ServePacket(l)
 
 }
