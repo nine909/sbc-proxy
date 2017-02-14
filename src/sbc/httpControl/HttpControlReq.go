@@ -70,8 +70,9 @@ func Hello(w http.ResponseWriter, r *http.Request, session sessions.Session, ps 
 	}(&wg)
 	wg.Wait()
 	log.Println("UPDServer : ", sbc)
-	for _, conn := range sbc.Conn {
-		log.Println("sbc.Conn: ", conn.LocalAddr().String())
+	log.Println("SBC Clients:", sbc.clients)
+	for key := range sbc.clients {
+		log.Println("sbc.Client: ", sbc.clients[key].addr)
 	}
 
 	errStore := scn.Store(keyStore, sbc)
@@ -92,9 +93,10 @@ func DeleteWTF(w http.ResponseWriter, r *http.Request, session sessions.Session,
 	sbc := value.(*Sbc)
 	fmt.Println(keyStore, sbc)
 
-	for _, conn := range sbc.Conn {
-		log.Println("Port Num: ", conn.LocalAddr().String())
-	}
+	// log.Println("SBC Clients:", sbc.portOpened)
+	// for key := range sbc.clients {
+	// 	log.Println("sbc.Client: ", sbc.clients[key].addr)
+	// }
 
 	sbc.DeletePort()
 }
@@ -109,8 +111,9 @@ func Lists(w http.ResponseWriter, r *http.Request, session sessions.Session, ps 
 	sbc := value.(*Sbc)
 	fmt.Println(keyStore, sbc)
 
-	for _, conn := range sbc.Conn {
-		log.Println("Port Num: ", conn.LocalAddr().String())
+	log.Println("SBC Clients:", sbc.clients)
+	for key := range sbc.clients {
+		log.Println("sbc.Client: ", sbc.clients[key].addr)
 	}
 
 }
