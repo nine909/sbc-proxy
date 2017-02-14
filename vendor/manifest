@@ -2,6 +2,12 @@
 	"version": 0,
 	"dependencies": [
 		{
+			"importpath": "github.com/BurntSushi/toml",
+			"repository": "https://github.com/BurntSushi/toml",
+			"revision": "99064174e013895bbd9b025c31100bd1d9b590ca",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/boj/redistore",
 			"repository": "https://github.com/boj/redistore",
 			"revision": "fc113767cd6b051980f260d6dbe84b2740c46ab0",
@@ -11,6 +17,12 @@
 			"importpath": "github.com/codegangsta/inject",
 			"repository": "https://github.com/codegangsta/inject",
 			"revision": "33e0aa1cb7c019ccc3fbe049a8262a6403d30504",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/ernado/sdp",
+			"repository": "https://github.com/ernado/sdp",
+			"revision": "43b85ad77caf66f9a964128da8c6c22aee23c1bb",
 			"branch": "master"
 		},
 		{
@@ -52,10 +64,28 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "github.com/howeyc/gopass",
+			"repository": "https://github.com/howeyc/gopass",
+			"revision": "bf9dde6d0d2c004a008c27aaee91170c786f6db8",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/julienschmidt/httprouter",
 			"repository": "https://github.com/julienschmidt/httprouter",
 			"revision": "8a45e95fc75cb77048068a62daed98cc22fdac7c",
 			"branch": "master"
+		},
+		{
+			"importpath": "github.com/kr/pretty",
+			"repository": "https://github.com/kr/pretty",
+			"revision": "cfb55aafdaf3ec08f0db22699ab822c50091b1c4",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/kr/text",
+			"repository": "https://github.com/kr/text",
+			"revision": "7cafcd837844e784b526369c9bce262804aebc60",
+			"branch": "main"
 		},
 		{
 			"importpath": "github.com/martini-contrib/sessions",
@@ -67,6 +97,19 @@
 			"importpath": "github.com/pixelbender/go-stun",
 			"repository": "https://github.com/pixelbender/go-stun",
 			"revision": "0b7811ed3bc852c024c91e052179c2d5f9812049",
+			"branch": "master"
+		},
+		{
+			"importpath": "golang.org/x/crypto/ssh/terminal",
+			"repository": "https://go.googlesource.com/crypto",
+			"revision": "92783773f0d5c65e68a806909423bea53c78df01",
+			"branch": "master",
+			"path": "/ssh/terminal"
+		},
+		{
+			"importpath": "gopkg.in/jmcvetta/napping.v3",
+			"repository": "https://gopkg.in/jmcvetta/napping.v3",
+			"revision": "d2748d8bdd2cffedec5c3024958de65bf7cb55aa",
 			"branch": "master"
 		}
 	]
