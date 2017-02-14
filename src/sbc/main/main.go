@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+
 	"sbc/conf"
 
 	"sbc/httpControl"
@@ -13,7 +14,6 @@ import (
 
 func main() {
 	config := conf.ReadConfig()
-	fmt.Println("Base URL: ", config.Baseurl)
 
 	m := martini.Classic()
 
@@ -27,7 +27,8 @@ func main() {
 
 	m.Post("/Test/:uid", httpControl.TestClient)
 
-	fmt.Println(http.ListenAndServe(":8080", m))
+	fmt.Println("Base URL: localhost:" + config.HttpPort)
+	fmt.Println(http.ListenAndServe(":"+config.HttpPort, m))
 
 }
 

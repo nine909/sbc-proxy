@@ -178,16 +178,16 @@ func sbpParser(sdpByte []byte) (OriginSdp, string) {
 	if err = d.Decode(m); err != nil {
 		log.Fatal("err:", err)
 	}
-	fmt.Println("Decoded session", m.Name)
-	fmt.Println("Info:", m.Info)
-	fmt.Println("Origin:", m.Origin)
-	fmt.Println("IP 4: ", m.Origin.Address)
-	fmt.Println("IP 4: ", m.Timing)
-	fmt.Println("NetworkType: ", m.Connection.NetworkType)
-	fmt.Println("AddressType: ", m.Connection.AddressType)
-	fmt.Println("IP: ", m.Connection.IP)
-	fmt.Println("TTL: ", m.Connection.TTL)
-	fmt.Println("Addresses: ", m.Connection.Addresses)
+	log.Println("Decoded session", m.Name)
+	log.Println("Info:", m.Info)
+	log.Println("Origin:", m.Origin)
+	log.Println("IP 4: ", m.Origin.Address)
+	log.Println("IP 4: ", m.Timing)
+	log.Println("NetworkType: ", m.Connection.NetworkType)
+	log.Println("AddressType: ", m.Connection.AddressType)
+	log.Println("IP: ", m.Connection.IP)
+	log.Println("TTL: ", m.Connection.TTL)
+	log.Println("Addresses: ", m.Connection.Addresses)
 
 	orig := OriginSdp{}
 	medias1 := sdp.Medias{}
@@ -197,16 +197,16 @@ func sbpParser(sdpByte []byte) (OriginSdp, string) {
 	isMultiMediaVideo := false
 	// var isRemove []int
 	for i, media := range m.Medias {
-		fmt.Println("=======================")
-		fmt.Println("Type: ", media.Description.Type)
-		fmt.Println("Port: ", media.Description.Port)
-		fmt.Println("PortsNumber: ", media.Description.PortsNumber)
-		fmt.Println("Protocol: ", media.Description.Protocol)
-		fmt.Println("Format: ", media.Description.Format)
-		fmt.Println("Medias Connection: ", media.Connection)
-		fmt.Println("Medias Attributes: ", media.Attributes)
-		fmt.Println("Medias Encryption: ", media.Encryption)
-		fmt.Println("Medias Bandwidths: ", media.Bandwidths)
+		log.Println("=======================")
+		log.Println("Type: ", media.Description.Type)
+		log.Println("Port: ", media.Description.Port)
+		log.Println("PortsNumber: ", media.Description.PortsNumber)
+		log.Println("Protocol: ", media.Description.Protocol)
+		log.Println("Format: ", media.Description.Format)
+		log.Println("Medias Connection: ", media.Connection)
+		log.Println("Medias Attributes: ", media.Attributes)
+		log.Println("Medias Encryption: ", media.Encryption)
+		log.Println("Medias Bandwidths: ", media.Bandwidths)
 
 		switch media.Description.Type {
 		case "audio":

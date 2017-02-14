@@ -2,6 +2,7 @@ package conf
 
 import (
 	"log"
+	"os"
 
 	"github.com/BurntSushi/toml"
 )
@@ -21,12 +22,13 @@ type Config struct {
 	Host      string
 	Url       string
 	Localip   string
+	HttpPort  string
 }
 
 // Reads info from config file
 func ReadConfig() Config {
 	var config Config
-	if _, err := toml.DecodeFile("Configure.conf", &config); err != nil {
+	if _, err := toml.DecodeFile(os.Getenv("GOPATH")+"/conf/Configure.conf", &config); err != nil {
 		log.Fatal(err)
 	}
 	Conf = config
