@@ -14,7 +14,7 @@ func CheckError(err error) {
 }
 
 func main() {
-	ServerAddr, err := net.ResolveUDPAddr("udp", "127.0.0.1:8080")
+	ServerAddr, err := net.ResolveUDPAddr("udp", "127.0.0.1:6060")
 	CheckError(err)
 
 	LocalAddr, err := net.ResolveUDPAddr("udp", "127.0.0.1:0")
@@ -28,7 +28,7 @@ func main() {
 	for {
 		msg := strconv.Itoa(i)
 		i++
-		buf := []byte(msg)
+		buf := []byte("Test Sbc: " + msg)
 		_, err := Conn.Write(buf)
 		if err != nil {
 			fmt.Println(msg, err)

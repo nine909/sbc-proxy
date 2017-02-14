@@ -21,6 +21,9 @@ func main() {
 	//	router := httprouter.New()
 	//	m.GET("/", httpControl.Index)
 	m.Get("/hello/:portgu", httpControl.Hello)
+	m.Get("/second/:portsec", httpControl.Second)
+	m.Get("/delete", httpControl.DeleteWTF)
+	m.Get("/list", httpControl.Lists)
 
 	//	m.GET("/user/:uid", httpControl.Getuser)
 	//	m.POST("/adduser/:uid", httpControl.Adduser)
