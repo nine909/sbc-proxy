@@ -14,13 +14,18 @@ type service interface {
 }
 
 type Sbc struct {
-	Conn        []*net.UDPConn
-	MapUDPAddrs map[*net.UDPConn]*net.UDPAddr
-	addrForward map[*net.UDPConn][]*net.UDPConn
+	clients map[*net.UDPConn]Client
+	// Conn    []*net.UDPConn
+	// MapUDPAddrs map[*net.UDPConn]*net.UDPAddr
+	// addrForward map[*net.UDPConn][]*net.UDPConn
+}
+
+type Client struct {
+	addr *net.UDPAddr
 }
 
 func NewSBCServer() *Sbc {
-	return &Sbc{MapUDPAddrs: make(map[*net.UDPConn]*net.UDPAddr), addrForward: make(map[*net.UDPConn][]*net.UDPConn)}
+	return &Sbc{clients: make(map[*net.UDPConn]Client)}
 }
 
 func (sbc *Sbc) Open(port string) (*net.UDPConn, error) {
@@ -47,7 +52,9 @@ func (sbc *Sbc) StartServer(port string) error {
 		fmt.Printf("Some error %v\n", err)
 		return err
 	}
-	sbc.Conn = append(sbc.Conn, conn)
+	client := Client{}
+	sbc.clients = append(sbc.clients, client)
+	// sbc.Conn = append(sbc.Conn, conn)
 	log.Println("UDP Server Started!!!")
 	go sbc.UDPServer(conn)
 	return nil
