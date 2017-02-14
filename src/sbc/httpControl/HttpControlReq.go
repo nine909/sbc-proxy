@@ -12,7 +12,6 @@ import (
 
 	b64 "encoding/base64"
 	msg "sbc/messages"
-	"sbc/stunSBC"
 
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/sessions"
@@ -22,6 +21,10 @@ import (
 
 	"github.com/ernado/sdp"
 	//	"os"
+
+	"sync"
+	//	"github.com/julienschmidt/httprouter"
+	"github.com/tideland/golib/scene"
 )
 
 // var OrigSdp OriginSdp
@@ -40,25 +43,76 @@ func Index(w http.ResponseWriter, r *http.Request, session sessions.Session) {
 	//	fmt.Fprintln(w, r)
 }
 
+var scn = scene.Start()
+var keyStore = "sbc001"
+
 func Hello(w http.ResponseWriter, r *http.Request, session sessions.Session, ps martini.Params) {
 
+	log.SetFlags(log.Lshortfile)
 	fmt.Fprintf(w, "hello, %s!\n", ps["portgu"])
 
-	go stunSBC.ServerListener(ps["portgu"])
+	value, err := scn.Fetch(keyStore)
+	if err != nil {
+		log.Println(err)
+		value = NewSBCServer()
+	}
+	sbc := value.(*Sbc)
+	log.Println(sbc)
+	var wg sync.WaitGroup
+	// var sbc *Sbc
+	port := ps["portgu"]
+
+	wg.Add(1)
+	go func(wg *sync.WaitGroup) {
+		defer wg.Done()
+		sbc.StartServer(port)
+
+	}(&wg)
+	wg.Wait()
+	log.Println("UPDServer : ", sbc)
+	for _, conn := range sbc.Conn {
+		log.Println("sbc.Conn: ", conn.LocalAddr().String())
+	}
+
+	errStore := scn.Store(keyStore, sbc)
+	if errStore != nil {
+		log.Println(errStore)
+	}
 
 }
 
-func Adduser(w http.ResponseWriter, r *http.Request, session sessions.Session, ps martini.Params) {
-	//	decoder := json.NewDecoder(r.Body)
-	//	var t test_struct
-	//	err := decoder.Decode(&t)
-	//	if err != nil {
-	//		panic(err)
-	//	}
-	//	defer r.Body.Close()
-	//	log.Println(t.Test)
+func DeleteWTF(w http.ResponseWriter, r *http.Request, session sessions.Session, ps martini.Params) {
 
-	//	sDec, _ := b64.StdEncoding.DecodeString(sEnc)
+	fmt.Fprintf(w, "delete, %s!\n", ps["delete"])
+	fmt.Println("Delete Handler")
+	value, err := scn.Fetch(keyStore)
+	if err != nil {
+		log.Println(err)
+	}
+	sbc := value.(*Sbc)
+	fmt.Println(keyStore, sbc)
+
+	for _, conn := range sbc.Conn {
+		log.Println("Port Num: ", conn.LocalAddr().String())
+	}
+
+	sbc.DeletePort()
+}
+
+func Lists(w http.ResponseWriter, r *http.Request, session sessions.Session, ps martini.Params) {
+
+	fmt.Fprintf(w, "Show list PortUDP already\n")
+	value, err := scn.Fetch(keyStore)
+	if err != nil {
+		log.Println(err)
+	}
+	sbc := value.(*Sbc)
+	fmt.Println(keyStore, sbc)
+
+	for _, conn := range sbc.Conn {
+		log.Println("Port Num: ", conn.LocalAddr().String())
+	}
+
 }
 
 func TestClient(w http.ResponseWriter, r *http.Request, session sessions.Session, ps martini.Params) {

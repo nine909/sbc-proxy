@@ -2,3 +2,4 @@ vendor/src/*
 src/github.com/*
 bin/*
 pkg/*
+src/sbc/demo/*

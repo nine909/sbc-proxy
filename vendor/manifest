@@ -46,6 +46,19 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "github.com/golang/groupcache",
+			"repository": "https://github.com/golang/groupcache",
+			"revision": "72d04f9fcdec7d3821820cc4a6f150eae553639a",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/golang/protobuf/proto",
+			"repository": "https://github.com/golang/protobuf",
+			"revision": "8ee79997227bf9b34611aee7946ae64735e6fd93",
+			"branch": "master",
+			"path": "/proto"
+		},
+		{
 			"importpath": "github.com/gorilla/context",
 			"repository": "https://github.com/gorilla/context",
 			"revision": "08b5f424b9271eedf6f9f0ce86cb9396ed337a42",
@@ -98,6 +111,41 @@
 			"repository": "https://github.com/pixelbender/go-stun",
 			"revision": "0b7811ed3bc852c024c91e052179c2d5f9812049",
 			"branch": "master"
+		},
+		{
+			"importpath": "github.com/tideland/golib/errors",
+			"repository": "https://github.com/tideland/golib",
+			"revision": "5fde4853b0d964c32581c069b47b1d3e879a49d9",
+			"branch": "master",
+			"path": "/errors"
+		},
+		{
+			"importpath": "github.com/tideland/golib/identifier",
+			"repository": "https://github.com/tideland/golib",
+			"revision": "596bcd1b4fc4e5f69bd3bd2fc70b7dce49be5daf",
+			"branch": "master",
+			"path": "/identifier"
+		},
+		{
+			"importpath": "github.com/tideland/golib/logger",
+			"repository": "https://github.com/tideland/golib",
+			"revision": "596bcd1b4fc4e5f69bd3bd2fc70b7dce49be5daf",
+			"branch": "master",
+			"path": "/logger"
+		},
+		{
+			"importpath": "github.com/tideland/golib/loop",
+			"repository": "https://github.com/tideland/golib",
+			"revision": "596bcd1b4fc4e5f69bd3bd2fc70b7dce49be5daf",
+			"branch": "master",
+			"path": "/loop"
+		},
+		{
+			"importpath": "github.com/tideland/golib/scene",
+			"repository": "https://github.com/tideland/golib",
+			"revision": "596bcd1b4fc4e5f69bd3bd2fc70b7dce49be5daf",
+			"branch": "master",
+			"path": "/scene"
 		},
 		{
 			"importpath": "golang.org/x/crypto/ssh/terminal",

@@ -22,6 +22,8 @@ func main() {
 
 	m.Get("/", httpControl.Index)
 	m.Get("/hello/:portgu", httpControl.Hello)
+	m.Get("/delete", httpControl.DeleteWTF)
+	m.Get("/list", httpControl.Lists)
 
 	m.Post("/Test/:uid", httpControl.TestClient)
 
