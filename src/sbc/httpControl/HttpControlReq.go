@@ -172,7 +172,7 @@ func TestClient(w http.ResponseWriter, r *http.Request, session sessions.Session
 
 	//start RTP
 	log.SetFlags(log.Lshortfile)
-	value, err := scn.Fetch(sdp.CallbackAddr)
+	value, err := scn.Fetch(sdp.CallbackAddr + sdp.CallbackSession)
 	if err != nil {
 		log.Println(err)
 		value = NewSBCServer()
@@ -196,7 +196,7 @@ func TestClient(w http.ResponseWriter, r *http.Request, session sessions.Session
 		log.Println("sbc.Client: ", sbc.clients[key].addr)
 	}
 
-	errStore := scn.Store(keyStore, sbc)
+	errStore := scn.Store(sdp.CallbackAddr+sdp.CallbackSession, sbc)
 	if errStore != nil {
 		log.Println(errStore)
 	}
@@ -264,7 +264,7 @@ func TestClient2(w http.ResponseWriter, r *http.Request, session sessions.Sessio
 
 	//start RTP
 	log.SetFlags(log.Lshortfile)
-	value, err := scn.Fetch(sdp.CallbackAddr)
+	value, err := scn.Fetch(sdp.CallbackAddr + sdp.CallbackSession)
 	if err != nil {
 		log.Println(err)
 		value = NewSBCServer()

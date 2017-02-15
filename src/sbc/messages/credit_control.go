@@ -3,6 +3,7 @@ package messages
 import (
 	"encoding/json"
 	"log"
+	"strconv"
 	"time"
 )
 
@@ -56,7 +57,7 @@ func ConstructCCR_I(sesstion string) string {
 	ccri.AuthApplicationId = ""
 	ccri.ServiceContextId = ""
 	ccri.CCRequestType = "1"
-	ccri.CCRequestNumber = string(seq + 1) //update to seq
+	ccri.CCRequestNumber = strconv.Itoa(seq + 1) //update to seq
 	ccri.EventTimestamp = time.Now().String()
 	ccri.ServiceIdentifier = ""
 	ccri.RouteRecord = ""
