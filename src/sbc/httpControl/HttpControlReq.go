@@ -31,10 +31,12 @@ import (
 // var OrigSdp OriginSdp
 
 type sdpMessage struct {
-	SDP             string
-	XSession        string `json:"x-session"`
-	CallbackAddr    string `json:"Callback-Address"`
-	CallbackSession string `json:"Callback-Session"`
+	SDP               string
+	XSession          string `json:"x-session"`
+	CallbackAddr      string `json:"Callback-Address"`
+	CallbackSession   string `json:"Callback-Session"`
+	resultcode        string
+	deverlopermessage string
 }
 
 func Index(w http.ResponseWriter, r *http.Request, session sessions.Session) {
@@ -206,10 +208,13 @@ func TestClient(w http.ResponseWriter, r *http.Request, session sessions.Session
 	sEnc := b64.StdEncoding.EncodeToString([]byte(newSdp))
 	// fmt.Fprintf(w, sEnc)
 	sdpRes := &sdpMessage{
-		SDP:             sEnc,
-		XSession:        sdp.XSession,
-		CallbackAddr:    sdp.CallbackAddr,
-		CallbackSession: sdp.CallbackSession}
+		SDP:               sEnc,
+		XSession:          sdp.XSession,
+		CallbackAddr:      sdp.CallbackAddr,
+		CallbackSession:   sdp.CallbackSession,
+		resultcode:        "200",
+		deverlopermessage: "OK"}
+
 	res2B, _ := json.Marshal(sdpRes)
 	fmt.Println(string(res2B))
 	fmt.Fprintf(w, string(res2B))
