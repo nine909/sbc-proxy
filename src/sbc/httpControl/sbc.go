@@ -85,7 +85,7 @@ func (sbc *Sbc) sendResponse(conn *net.UDPConn, p []byte) {
 			// n, err := key.WriteToUDP([]byte("From server: Hello I got your mesage \n"), sbc.clients[key].addr)
 			n, err := key.WriteToUDP(p, sbc.clients[key].addr)
 			if err != nil {
-				fmt.Printf("Couldn't send response %v", err)
+				fmt.Println("Couldn't send response %v", err)
 			}
 			fmt.Println(n, err)
 		}
@@ -101,24 +101,28 @@ func (sbc *Sbc) UDPServer(conn *net.UDPConn) error {
 	for {
 		log.Println("Waiting Incoming...")
 		_, remoteaddr, err := conn.ReadFromUDP(p)
-		log.Println("Remote Address:", remoteaddr)
-		if val, ok := sbc.clients[conn]; !ok {
-			client := Client{addr: remoteaddr}
-			log.Println("Added New Client:", client.addr)
-			sbc.clients[conn] = client
-		} else {
-			log.Println("Client is Existed:", val.addr)
-		}
 
-		log.Println("Client UDPAddr:", sbc.clients[conn])
-		// sbc.MapUDPAddrs[ser] = remoteaddr
-		// log.Println("MapUDPAddress:", sbc.MapUDPAddrs[ser])
-		fmt.Printf("Read a message from %v %s \n", remoteaddr, p)
 		if err != nil {
 			fmt.Printf("Some error  %v", err)
 			// continue
 			return err
 		}
+
+		log.Println("Remote Address:", remoteaddr)
+		client := Client{addr: remoteaddr}
+		if val, ok := sbc.clients[conn]; !ok {
+			log.Println("Added New Client:", client.addr)
+		} else {
+			log.Println("Client is Existed:", val.addr)
+			log.Println("Update Client:", client.addr)
+		}
+		sbc.clients[conn] = client
+
+		log.Println("Client UDPAddr:", sbc.clients[conn])
+		// sbc.MapUDPAddrs[ser] = remoteaddr
+		// log.Println("MapUDPAddress:", sbc.MapUDPAddrs[ser])
+		fmt.Printf("Read a message from %v %s \n", remoteaddr, p)
+
 		go sbc.sendResponse(conn, p)
 	}
 }
