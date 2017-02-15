@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/http"
 	//"strings"
+	"math/rand"
 
 	conf "sbc/conf"
 
@@ -21,7 +22,7 @@ import (
 
 	"github.com/ernado/sdp"
 	//	"os"
-
+	"strconv"
 	"sync"
 	//	"github.com/julienschmidt/httprouter"
 	"github.com/tideland/golib/scene"
@@ -142,17 +143,64 @@ func TestClient(w http.ResponseWriter, r *http.Request, session sessions.Session
 	log.Println("Recieve response from P-WRTC")
 	log.Println("Data: ", an)
 
+	var aport string
+	var vport string
+	for {
+		ap := rand.Int()
+		vp := rand.Int()
+		aport = strconv.Itoa(int(ap))[:5]
+		vport = strconv.Itoa(int(vp))[:5]
+		_, aerr := net.ResolveUDPAddr("udp", ":"+aport)
+		_, verr := net.ResolveUDPAddr("udp", ":"+vport)
+		if aerr == nil && verr == nil {
+			log.Println("new audio port:", aport)
+			log.Println("new video port:", vport)
+			break
+		}
+	}
+
 	//decode base64
 	desdp, _ := b64.StdEncoding.DecodeString(sdp.SDP)
 	log.Println("SDP Decode: ", string(desdp))
-	mediaDesc, newSdp := sbpParser(desdp)
+	mediaDesc, newSdp := sbpParser(desdp, aport, vport)
 	fmt.Println(mediaDesc.ip)
 	fmt.Println(newSdp)
+
+	//start RTP
+	log.SetFlags(log.Lshortfile)
+	value, err := scn.Fetch(sdp.CallbackAddr)
+	if err != nil {
+		log.Println(err)
+		value = NewSBCServer()
+	}
+	sbc := value.(*Sbc)
+	log.Println(sbc)
+	var wg sync.WaitGroup
+	// var sbc *Sbc
+
+	wg.Add(1)
+	go func(wg *sync.WaitGroup) {
+		defer wg.Done()
+		sbc.StartServer(aport)
+		sbc.StartServer(vport)
+
+	}(&wg)
+	wg.Wait()
+	log.Println("UPDServer : ", sbc)
+	log.Println("SBC Clients:", sbc.clients)
+	for key := range sbc.clients {
+		log.Println("sbc.Client: ", sbc.clients[key].addr)
+	}
+
+	errStore := scn.Store(keyStore, sbc)
+	if errStore != nil {
+		log.Println(errStore)
+	}
+	//end rtp
 
 	//encode base64
 	sEnc := b64.StdEncoding.EncodeToString([]byte(newSdp))
 	// fmt.Fprintf(w, sEnc)
-
 	sdpRes := &sdpMessage{
 		SDP:             sEnc,
 		XSession:        sdp.XSession,
@@ -161,10 +209,9 @@ func TestClient(w http.ResponseWriter, r *http.Request, session sessions.Session
 	res2B, _ := json.Marshal(sdpRes)
 	fmt.Println(string(res2B))
 	fmt.Fprintf(w, string(res2B))
-
 }
 
-func sbpParser(sdpByte []byte) (OriginSdp, string) {
+func sbpParser(sdpByte []byte, aport, vport string) (OriginSdp, string) {
 	var (
 		s   sdp.Session
 		err error
@@ -211,13 +258,15 @@ func sbpParser(sdpByte []byte) (OriginSdp, string) {
 		log.Println("Medias Encryption: ", media.Encryption)
 		log.Println("Medias Bandwidths: ", media.Bandwidths)
 
+		a, _ := strconv.Atoi(aport)
+		v, _ := strconv.Atoi(vport)
 		switch media.Description.Type {
 		case "audio":
 			if !isMultiMediaAudio {
 				orig.audio.port = media.Description.Port
 				orig.audio.portsNumber = media.Description.PortsNumber
 				orig.audio.protocal = media.Description.Protocol
-				m.Medias[i].Description.Port = 11111
+				m.Medias[i].Description.Port = a
 				isMultiMediaAudio = true
 				medias1 = append(medias1, m.Medias[i])
 			}
@@ -226,7 +275,7 @@ func sbpParser(sdpByte []byte) (OriginSdp, string) {
 				orig.video.port = media.Description.Port
 				orig.video.portsNumber = media.Description.PortsNumber
 				orig.video.protocal = media.Description.Protocol
-				m.Medias[i].Description.Port = 555
+				m.Medias[i].Description.Port = v
 				isMultiMediaVideo = true
 				medias1 = append(medias1, m.Medias[i])
 			}
