@@ -14,19 +14,20 @@ import (
 	"net/http"
 )
 
-func RequestHTTTP(host, data string) string {
+func RequestHTTTP(host, data string) (string, error) {
 	/*url := "http://restapi3.apiary.io/notes"
 	fmt.Println("URL:>", url)*/
 
 	var jsonStr = []byte(data)
-	req, err := http.NewRequest("POST", "http://"+host, bytes.NewBuffer(jsonStr))
+	req, _ := http.NewRequest("POST", "http://"+host, bytes.NewBuffer(jsonStr))
 	req.Header.Set("X-Custom-Header", "myvalue")
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		panic(err)
+	resp, errhttp := client.Do(req)
+	if errhttp != nil {
+		//		panic(nil, err)
+		return "", errhttp
 	}
 	defer resp.Body.Close()
 
@@ -35,5 +36,5 @@ func RequestHTTTP(host, data string) string {
 	body, _ := ioutil.ReadAll(resp.Body)
 	fmt.Println("response Body:", string(body))
 
-	return string(body)
+	return string(body), nil
 }
