@@ -113,6 +113,12 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "github.com/pkg/errors",
+			"repository": "https://github.com/pkg/errors",
+			"revision": "248dadf4e9068a0b3e79f02ed0a610d935de5302",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/tideland/golib/errors",
 			"repository": "https://github.com/tideland/golib",
 			"revision": "5fde4853b0d964c32581c069b47b1d3e879a49d9",
