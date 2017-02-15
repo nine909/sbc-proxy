@@ -30,13 +30,14 @@ import (
 
 // var OrigSdp OriginSdp
 
-type sdpMessage struct {
-	SDP               string
-	XSession          string `json:"x-session"`
-	CallbackAddr      string `json:"Callback-Address"`
-	CallbackSession   string `json:"Callback-Session"`
-	resultcode        string
-	deverlopermessage string
+type sdpMessages struct {
+	SDP             string
+	XSession        string `json:"x-session"`
+	CallbackAddr    string `json:"Callback-Address"`
+	CallbackSession string `json:"Callback-Session"`
+
+	Resultcode        string `json:"resultcode"`
+	Deverlopermessage string `json:"deverlopermessage"`
 }
 
 func Index(w http.ResponseWriter, r *http.Request, session sessions.Session) {
@@ -126,8 +127,9 @@ func TestClient(w http.ResponseWriter, r *http.Request, session sessions.Session
 	//	uid := ps.ByName("uid")
 	//	fmt.Println(r.))
 	//	fmt.Fprintf(w, "you are add user %s", uid)
+
 	decoder := json.NewDecoder(r.Body)
-	var sdp sdpMessage
+	var sdp sdpMessages
 	err := decoder.Decode(&sdp)
 	if err != nil {
 		panic(err)
@@ -136,6 +138,8 @@ func TestClient(w http.ResponseWriter, r *http.Request, session sessions.Session
 
 	log.Println("SDP Encode: ", sdp.SDP)
 	log.Println("SDP X-Session: ", sdp.XSession)
+	log.Println("SDP result code: ", sdp.Resultcode)
+	log.Println("SDP dev msg code: ", sdp.Deverlopermessage)
 
 	log.Println("Send request To P-WRTC ", sdp.CallbackAddr)
 	ccri := msg.ConstructCCR_I(sdp.CallbackSession)
@@ -206,14 +210,14 @@ func TestClient(w http.ResponseWriter, r *http.Request, session sessions.Session
 
 	//encode base64
 	sEnc := b64.StdEncoding.EncodeToString([]byte(newSdp))
-	// fmt.Fprintf(w, sEnc)
-	sdpRes := &sdpMessage{
+	fmt.Printf(sEnc)
+	sdpRes := &sdpMessages{
 		SDP:               sEnc,
 		XSession:          sdp.XSession,
 		CallbackAddr:      sdp.CallbackAddr,
 		CallbackSession:   sdp.CallbackSession,
-		resultcode:        "200",
-		deverlopermessage: "OK"}
+		Resultcode:        "200",
+		Deverlopermessage: "OK"}
 
 	res2B, _ := json.Marshal(sdpRes)
 	fmt.Println(string(res2B))
@@ -226,7 +230,7 @@ func TestClient2(w http.ResponseWriter, r *http.Request, session sessions.Sessio
 	//	fmt.Println(r.))
 	//	fmt.Fprintf(w, "you are add user %s", uid)
 	decoder := json.NewDecoder(r.Body)
-	var sdp sdpMessage
+	var sdp sdpMessages
 	err := decoder.Decode(&sdp)
 	if err != nil {
 		panic(err)
@@ -302,11 +306,13 @@ func TestClient2(w http.ResponseWriter, r *http.Request, session sessions.Sessio
 	//encode base64
 	sEnc := b64.StdEncoding.EncodeToString([]byte(newSdp))
 	// fmt.Fprintf(w, sEnc)
-	sdpRes := &sdpMessage{
-		SDP:             sEnc,
-		XSession:        sdp.XSession,
-		CallbackAddr:    sdp.CallbackAddr,
-		CallbackSession: sdp.CallbackSession}
+	sdpRes := &sdpMessages{
+		SDP:               sEnc,
+		XSession:          sdp.XSession,
+		CallbackAddr:      sdp.CallbackAddr,
+		CallbackSession:   sdp.CallbackSession,
+		Resultcode:        "200",
+		Deverlopermessage: "OK"}
 	res2B, _ := json.Marshal(sdpRes)
 	fmt.Println(string(res2B))
 	fmt.Fprintf(w, string(res2B))
