@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"strconv"
-	"time"
+	//	"time"
 )
 
 var seq int = 0
@@ -58,7 +58,7 @@ func ConstructCCR_I(sesstion string) string {
 	ccri.ServiceContextId = ""
 	ccri.CCRequestType = "1"
 	ccri.CCRequestNumber = strconv.Itoa(seq + 1) //update to seq
-	ccri.EventTimestamp = time.Now().String()
+	ccri.EventTimestamp = "4455214411"
 	ccri.ServiceIdentifier = ""
 	ccri.RouteRecord = ""
 	ccri.SubscriptId = SubscriptionId{"dd", "ddd"}
