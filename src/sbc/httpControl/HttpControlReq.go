@@ -138,7 +138,7 @@ func TestClient(w http.ResponseWriter, r *http.Request, session sessions.Session
 	log.Println("Send request To P-WRTC ", sdp.CallbackAddr)
 	ccri := msg.ConstructCCR_I()
 
-	an := RequestHTTTP(sdp.CallbackAddr, ccri)
+	an := RequestHTTTP(sdp.CallbackAddr+"/"+sdp.CallbackSession, ccri)
 
 	log.Println("Recieve response from P-WRTC")
 	log.Println("Data: ", an)
