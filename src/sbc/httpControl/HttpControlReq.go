@@ -136,7 +136,7 @@ func TestClient(w http.ResponseWriter, r *http.Request, session sessions.Session
 	log.Println("SDP X-Session: ", sdp.XSession)
 
 	log.Println("Send request To P-WRTC ", sdp.CallbackAddr)
-	ccri := msg.ConstructCCR_I()
+	ccri := msg.ConstructCCR_I(sdp.CallbackSession)
 
 	an, errhttp := RequestHTTTP(sdp.CallbackAddr+"/CCR-I/"+sdp.CallbackSession+"?", ccri)
 	if errhttp != nil {

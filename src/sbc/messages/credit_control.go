@@ -2,9 +2,11 @@ package messages
 
 import (
 	"encoding/json"
-
 	"log"
+	"time"
 )
+
+var seq int = 0
 
 type Credit_Control struct {
 	SessionId         string               `json:"Session-Id"`
@@ -48,19 +50,19 @@ type INInformation struct {
 	EventTypeBCSM              string `json:"EventType-BCSM"`
 }
 
-func ConstructCCR_I() string {
+func ConstructCCR_I(sesstion string) string {
 	ccri := &Credit_Control{}
-	ccri.SessionId = "ddd"
+	ccri.SessionId = sesstion
 	ccri.AuthApplicationId = ""
 	ccri.ServiceContextId = ""
-	ccri.CCRequestType = ""
-	ccri.CCRequestNumber = ""
-	ccri.EventTimestamp = ""
+	ccri.CCRequestType = "1"
+	ccri.CCRequestNumber = string(seq + 1) //update to seq
+	ccri.EventTimestamp = time.Now().String()
 	ccri.ServiceIdentifier = ""
 	ccri.RouteRecord = ""
 	ccri.SubscriptId = SubscriptionId{"dd", "ddd"}
 	ccri.ReqSernit.CCTime = ""
-	ccri.UsedSerUnit.CCTime = ""
+	ccri.UsedSerUnit.CCTime = "180"
 
 	inInfo1 := INInformation{}
 	inInfo1.ChargeFlowType = ""
