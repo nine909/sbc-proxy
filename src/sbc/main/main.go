@@ -26,6 +26,7 @@ func main() {
 	m.Get("/list", httpControl.Lists)
 
 	m.Post("/Test/:uid", httpControl.TestClient)
+	m.Post("/Test2/:uid", httpControl.TestClient2)
 
 	fmt.Println("Base URL: localhost:" + config.HttpPort)
 	fmt.Println(http.ListenAndServe(":"+config.HttpPort, m))

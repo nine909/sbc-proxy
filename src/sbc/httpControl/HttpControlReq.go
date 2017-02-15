@@ -163,8 +163,8 @@ func TestClient(w http.ResponseWriter, r *http.Request, session sessions.Session
 	desdp, _ := b64.StdEncoding.DecodeString(sdp.SDP)
 	log.Println("SDP Decode: ", string(desdp))
 	mediaDesc, newSdp := sbpParser(desdp, aport, vport)
-	fmt.Println(mediaDesc.ip)
-	fmt.Println(newSdp)
+	log.Println(mediaDesc.ip)
+	log.Println(newSdp)
 
 	//start RTP
 	log.SetFlags(log.Lshortfile)
@@ -211,6 +211,97 @@ func TestClient(w http.ResponseWriter, r *http.Request, session sessions.Session
 	fmt.Fprintf(w, string(res2B))
 }
 
+func TestClient2(w http.ResponseWriter, r *http.Request, session sessions.Session, ps martini.Params) {
+	// uid := r.FormValue("uid")
+	//	uid := ps.ByName("uid")
+	//	fmt.Println(r.))
+	//	fmt.Fprintf(w, "you are add user %s", uid)
+	decoder := json.NewDecoder(r.Body)
+	var sdp sdpMessage
+	err := decoder.Decode(&sdp)
+	if err != nil {
+		panic(err)
+	}
+	defer r.Body.Close()
+
+	log.Println("SDP Encode: ", sdp.SDP)
+	log.Println("SDP X-Session: ", sdp.XSession)
+
+	log.Println("Send request To P-WRTC ", sdp.CallbackAddr)
+	//	ccri := msg.ConstructCCR_I()
+
+	//	an := RequestHTTTP(sdp.CallbackAddr, ccri)
+
+	//	log.Println("Recieve response from P-WRTC")
+	//	log.Println("Data: ", an)
+
+	var aport string
+	var vport string
+	for {
+		ap := rand.Int()
+		vp := rand.Int()
+		aport = strconv.Itoa(int(ap))[:5]
+		vport = strconv.Itoa(int(vp))[:5]
+		_, aerr := net.ResolveUDPAddr("udp", ":"+aport)
+		_, verr := net.ResolveUDPAddr("udp", ":"+vport)
+		if aerr == nil && verr == nil {
+			log.Println("new audio port:", aport)
+			log.Println("new video port:", vport)
+			break
+		}
+	}
+
+	//decode base64
+	desdp, _ := b64.StdEncoding.DecodeString(sdp.SDP)
+	log.Println("SDP Decode: ", string(desdp))
+	mediaDesc, newSdp := sbpParser(desdp, aport, vport)
+	log.Println(mediaDesc.ip)
+	log.Println(newSdp)
+
+	//start RTP
+	log.SetFlags(log.Lshortfile)
+	value, err := scn.Fetch(sdp.CallbackAddr)
+	if err != nil {
+		log.Println(err)
+		value = NewSBCServer()
+	}
+	sbc := value.(*Sbc)
+	log.Println(sbc)
+	var wg sync.WaitGroup
+	// var sbc *Sbc
+
+	wg.Add(1)
+	go func(wg *sync.WaitGroup) {
+		defer wg.Done()
+		sbc.StartServer(aport)
+		sbc.StartServer(vport)
+
+	}(&wg)
+	wg.Wait()
+	log.Println("UPDServer : ", sbc)
+	log.Println("SBC Clients:", sbc.clients)
+	for key := range sbc.clients {
+		log.Println("sbc.Client: ", sbc.clients[key].addr)
+	}
+
+	errStore := scn.Store(keyStore, sbc)
+	if errStore != nil {
+		log.Println(errStore)
+	}
+	//end rtp
+
+	//encode base64
+	sEnc := b64.StdEncoding.EncodeToString([]byte(newSdp))
+	// fmt.Fprintf(w, sEnc)
+	sdpRes := &sdpMessage{
+		SDP:             sEnc,
+		XSession:        sdp.XSession,
+		CallbackAddr:    sdp.CallbackAddr,
+		CallbackSession: sdp.CallbackSession}
+	res2B, _ := json.Marshal(sdpRes)
+	fmt.Println(string(res2B))
+	fmt.Fprintf(w, string(res2B))
+}
 func sbpParser(sdpByte []byte, aport, vport string) (OriginSdp, string) {
 	var (
 		s   sdp.Session
