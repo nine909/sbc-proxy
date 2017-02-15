@@ -25,8 +25,8 @@ func main() {
 	m.Get("/delete", httpControl.DeleteWTF)
 	m.Get("/list", httpControl.Lists)
 
-	m.Post("/Test/:uid", httpControl.TestClient)
-	m.Post("/Test2/:uid", httpControl.TestClient2)
+	m.Post("/p-SSF/1.0.0/SBC/ResourceAllocate1/:uid", httpControl.TestClient)
+	m.Post("/p-SSF/1.0.0/SBC/ResourceAllocate2/:uid", httpControl.TestClient2)
 
 	fmt.Println("Base URL: localhost:" + config.HttpPort)
 	fmt.Println(http.ListenAndServe(":"+config.HttpPort, m))
