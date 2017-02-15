@@ -58,7 +58,7 @@ func ConstructCCR_I(sesstion string) string {
 	ccri.ServiceContextId = ""
 	ccri.CCRequestType = "1"
 	ccri.CCRequestNumber = strconv.Itoa(seq + 1) //update to seq
-	ccri.EventTimestamp = "4455214411"
+	ccri.EventTimestamp = "3679200292"
 	ccri.ServiceIdentifier = ""
 	ccri.RouteRecord = ""
 	ccri.SubscriptId = SubscriptionId{"dd", "ddd"}
