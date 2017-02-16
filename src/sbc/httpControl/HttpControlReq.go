@@ -193,6 +193,8 @@ func TestClient(w http.ResponseWriter, r *http.Request, session sessions.Session
 		value = NewSBCServer()
 	}
 	sbc := value.(*Sbc)
+	log.Println("Session get ", sdp.CallbackAddr+sdp.CallbackSession, sbc)
+
 	log.Println(sbc)
 	var wg sync.WaitGroup
 	// var sbc *Sbc
@@ -215,6 +217,9 @@ func TestClient(w http.ResponseWriter, r *http.Request, session sessions.Session
 	if errStore != nil {
 		log.Println(errStore)
 	}
+
+	log.Println("Session get ", sdp.CallbackAddr+sdp.CallbackSession, sbc)
+
 	//end rtp
 
 	//encode base64
@@ -296,7 +301,9 @@ func TestClient2(w http.ResponseWriter, r *http.Request, session sessions.Sessio
 		log.Println(err)
 		value = NewSBCServer()
 	}
+
 	sbc := value.(*Sbc)
+	log.Println("Session get ", sdp.CallbackAddr+sdp.CallbackSession, sbc)
 	log.Println(sbc)
 	var wg sync.WaitGroup
 	// var sbc *Sbc
@@ -319,6 +326,8 @@ func TestClient2(w http.ResponseWriter, r *http.Request, session sessions.Sessio
 	if errStore != nil {
 		log.Println(errStore)
 	}
+
+	log.Println("Session increment ", sdp.CallbackAddr+sdp.CallbackSession, sbc)
 	//end rtp
 
 	//encode base64
