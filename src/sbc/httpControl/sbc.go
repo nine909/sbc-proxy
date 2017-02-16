@@ -83,6 +83,7 @@ func (sbc *Sbc) sendResponse(conn *net.UDPConn, p []byte) {
 		log.Println("KeyName:", key)
 		if key != conn {
 			// n, err := key.WriteToUDP([]byte("From server: Hello I got your mesage \n"), sbc.clients[key].addr)
+			log.Println("Send to ", key, sbc.clients[key].addr)
 			n, err := key.WriteToUDP(p, sbc.clients[key].addr)
 			if err != nil {
 				fmt.Println("Couldn't send response %v", err)

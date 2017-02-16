@@ -196,7 +196,7 @@ func TestClient(w http.ResponseWriter, r *http.Request, session sessions.Session
 	log.Println("Session get ", sdp.CallbackAddr+sdp.CallbackSession, sbc)
 
 	for key := range sbc.clients {
-		log.Println("KeyName:", key)
+		log.Println("KeyName:", key, sbc.clients[key].addr)
 
 	}
 
@@ -311,7 +311,7 @@ func TestClient2(w http.ResponseWriter, r *http.Request, session sessions.Sessio
 	log.Println("Session get ", sdp.CallbackAddr+sdp.CallbackSession, sbc)
 
 	for key := range sbc.clients {
-		log.Println("KeyName:", key)
+		log.Println("KeyName:", key, sbc.clients[key].addr)
 
 	}
 	log.Println(sbc)
