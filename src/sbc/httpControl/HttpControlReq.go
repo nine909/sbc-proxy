@@ -172,7 +172,7 @@ func TestClient(w http.ResponseWriter, r *http.Request, session sessions.Session
 	//decode base64
 	desdp, _ := b64.StdEncoding.DecodeString(sdp.SDP)
 	log.Println("SDP Decode: ", string(desdp))
-	mediaDesc, _ := sbpParser(desdp, aport, vport)
+	mediaDesc := sbpParser(desdp, aport, vport)
 	log.Println(mediaDesc.ip)
 
 	log.Println("Old port: ", mediaDesc.audio.port)
@@ -276,7 +276,7 @@ func TestClient2(w http.ResponseWriter, r *http.Request, session sessions.Sessio
 	//decode base64
 	desdp, _ := b64.StdEncoding.DecodeString(sdp.SDP)
 	log.Println("SDP Decode: ", string(desdp))
-	mediaDesc, _ := sbpParser(desdp, aport, vport)
+	mediaDesc := sbpParser(desdp, aport, vport)
 
 	log.Println("Old port: ", mediaDesc.audio.port)
 	log.Println("New port: ", aport)
@@ -315,7 +315,7 @@ func TestClient2(w http.ResponseWriter, r *http.Request, session sessions.Sessio
 		log.Println("sbc.Client: ", sbc.clients[key].addr)
 	}
 
-	errStore := scn.Store(keyStore, sbc)
+	errStore := scn.Store(sdp.CallbackAddr+sdp.CallbackSession, sbc)
 	if errStore != nil {
 		log.Println(errStore)
 	}
@@ -335,7 +335,7 @@ func TestClient2(w http.ResponseWriter, r *http.Request, session sessions.Sessio
 	fmt.Println(string(res2B))
 	fmt.Fprintf(w, string(res2B))
 }
-func sbpParser(sdpByte []byte, aport, vport string) (OriginSdp, string) {
+func sbpParser(sdpByte []byte, aport, vport string) OriginSdp {
 	var (
 		s   sdp.Session
 		err error
@@ -382,15 +382,13 @@ func sbpParser(sdpByte []byte, aport, vport string) (OriginSdp, string) {
 		log.Println("Medias Encryption: ", media.Encryption)
 		log.Println("Medias Bandwidths: ", media.Bandwidths)
 
-		a, _ := strconv.Atoi(aport)
-		v, _ := strconv.Atoi(vport)
 		switch media.Description.Type {
 		case "audio":
 			if !isMultiMediaAudio {
 				orig.audio.port = media.Description.Port
 				orig.audio.portsNumber = media.Description.PortsNumber
 				orig.audio.protocal = media.Description.Protocol
-				m.Medias[i].Description.Port = a
+
 				isMultiMediaAudio = true
 				medias1 = append(medias1, m.Medias[i])
 			}
@@ -399,7 +397,7 @@ func sbpParser(sdpByte []byte, aport, vport string) (OriginSdp, string) {
 				orig.video.port = media.Description.Port
 				orig.video.portsNumber = media.Description.PortsNumber
 				orig.video.protocal = media.Description.Protocol
-				m.Medias[i].Description.Port = v
+
 				isMultiMediaVideo = true
 				medias1 = append(medias1, m.Medias[i])
 			}
@@ -411,12 +409,9 @@ func sbpParser(sdpByte []byte, aport, vport string) (OriginSdp, string) {
 	//replace ip
 	//	m.Origin.Address = conf.Conf.Localip
 	m.Connection.IP = net.ParseIP(conf.Conf.Localip)
-
-	newSdp := constructSdp(m)
-
 	//encode base64
 	//	log.Print("dddddddddddddddddd", orig.audio.port)
-	return orig, newSdp
+	return orig
 
 }
 
