@@ -417,8 +417,8 @@ func constructSdp(me *sdp.Message) string {
 
 	// appending session to byte buffer
 	b = s.AppendTo(b)
-	fmt.Println("SDP Construct :", string(b))
-	return string(b)
+	log.Println("SDP Construct :", string(b)+"\n")
+	return string(b) + "\n"
 }
 
 type OriginSdp struct {
