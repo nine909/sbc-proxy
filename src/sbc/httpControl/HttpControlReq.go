@@ -186,45 +186,7 @@ func TestClient(w http.ResponseWriter, r *http.Request, session sessions.Session
 
 	log.Println("New sdp: ", newSdp)
 	//start RTP
-	log.SetFlags(log.Lshortfile)
-	value, err := scn.Fetch(sdp.CallbackAddr + sdp.CallbackSession)
-	if err != nil {
-		log.Println(err)
-		value = NewSBCServer()
-	}
-	sbc := value.(*Sbc)
-	log.Println("Session get ", sdp.CallbackAddr+sdp.CallbackSession, sbc)
-
-	for key := range sbc.clients {
-		log.Println("KeyName:", key, sbc.clients[key].addr)
-
-	}
-
-	log.Println(sbc)
-	var wg sync.WaitGroup
-	// var sbc *Sbc
-
-	wg.Add(1)
-	go func(wg *sync.WaitGroup) {
-		defer wg.Done()
-		sbc.StartServer(aport)
-		//		sbc.StartServer(vport)
-
-	}(&wg)
-	wg.Wait()
-	log.Println("UPDServer : ", sbc)
-	log.Println("SBC Clients:", sbc.clients)
-	for key := range sbc.clients {
-		log.Println("sbc.Client: ", sbc.clients[key].addr)
-	}
-
-	errStore := scn.Store(sdp.CallbackAddr+sdp.CallbackSession, sbc)
-	if errStore != nil {
-		log.Println(errStore)
-	}
-
-	log.Println("Session get ", sdp.CallbackAddr+sdp.CallbackSession, sbc)
-
+	rtpMapping(sdp.CallbackAddr+sdp.CallbackSession, mediaDesc.ip+":"+oldport, aport)
 	//end rtp
 
 	//encode base64
@@ -300,44 +262,9 @@ func TestClient2(w http.ResponseWriter, r *http.Request, session sessions.Sessio
 	log.Println(newSdp)
 
 	//start RTP
-	log.SetFlags(log.Lshortfile)
-	value, err := scn.Fetch(sdp.CallbackAddr + sdp.CallbackSession)
-	if err != nil {
-		log.Println(err)
-		value = NewSBCServer()
-	}
 
-	sbc := value.(*Sbc)
-	log.Println("Session get ", sdp.CallbackAddr+sdp.CallbackSession, sbc)
+	rtpMapping(sdp.CallbackAddr+sdp.CallbackSession, mediaDesc.ip+":"+oldport, aport)
 
-	for key := range sbc.clients {
-		log.Println("KeyName:", key, sbc.clients[key].addr)
-
-	}
-	log.Println(sbc)
-	var wg sync.WaitGroup
-	// var sbc *Sbc
-
-	wg.Add(1)
-	go func(wg *sync.WaitGroup) {
-		defer wg.Done()
-		sbc.StartServer(aport)
-		//		sbc.StartServer(vport)
-
-	}(&wg)
-	wg.Wait()
-	log.Println("UPDServer : ", sbc)
-	log.Println("SBC Clients:", sbc.clients)
-	for key := range sbc.clients {
-		log.Println("sbc.Client: ", sbc.clients[key].addr)
-	}
-
-	errStore := scn.Store(sdp.CallbackAddr+sdp.CallbackSession, sbc)
-	if errStore != nil {
-		log.Println(errStore)
-	}
-
-	log.Println("Session increment ", sdp.CallbackAddr+sdp.CallbackSession, sbc)
 	//end rtp
 
 	//encode base64
@@ -432,6 +359,47 @@ func sbpParser(sdpByte []byte, aport, vport string) OriginSdp {
 	//	log.Print("dddddddddddddddddd", orig.audio.port)
 	return orig
 
+}
+func rtpMapping(session, uri, port string) {
+
+	log.SetFlags(log.Lshortfile)
+	value, err := scn.Fetch(session)
+	if err != nil {
+		log.Println(err)
+		value = NewSBCServer()
+	}
+
+	sbc := value.(*Sbc)
+	log.Println("Session get ", session, sbc)
+
+	for key := range sbc.clients {
+		log.Println("KeyName:", key, sbc.clients[key].addr)
+
+	}
+	log.Println(sbc)
+	var wg sync.WaitGroup
+	// var sbc *Sbc
+
+	wg.Add(1)
+	go func(wg *sync.WaitGroup) {
+		defer wg.Done()
+		sbc.StartServer(port)
+		//		sbc.StartServer(vport)
+
+	}(&wg)
+	wg.Wait()
+	log.Println("UPDServer : ", sbc)
+	log.Println("SBC Clients:", sbc.clients)
+	for key := range sbc.clients {
+		log.Println("sbc.Client: ", sbc.clients[key].addr)
+	}
+
+	errStore := scn.Store(session, sbc)
+	if errStore != nil {
+		log.Println(errStore)
+	}
+
+	log.Println("Session increment ", session, sbc)
 }
 
 func constructSdp(me *sdp.Message) string {
