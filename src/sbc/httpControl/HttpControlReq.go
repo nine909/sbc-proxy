@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"net"
 	"net/http"
-	//"strings"
-	"math/rand"
+	"strings"
 
 	conf "sbc/conf"
 
@@ -172,10 +172,19 @@ func TestClient(w http.ResponseWriter, r *http.Request, session sessions.Session
 	//decode base64
 	desdp, _ := b64.StdEncoding.DecodeString(sdp.SDP)
 	log.Println("SDP Decode: ", string(desdp))
-	mediaDesc, newSdp := sbpParser(desdp, aport, vport)
+	mediaDesc, _ := sbpParser(desdp, aport, vport)
 	log.Println(mediaDesc.ip)
-	log.Println(newSdp)
 
+	log.Println("Old port: ", mediaDesc.audio.port)
+	log.Println("New port: ", aport)
+	s := string(desdp)
+	oip := mediaDesc.ip
+	oldport := strconv.Itoa(mediaDesc.audio.port)
+	newSdp := strings.Replace(s, oldport, aport, -1)
+	newSdp = strings.Replace(newSdp, "c=IN IP4 "+oip, "c=IN IP4 "+conf.Conf.Localip, -1)
+	//	c=IN IP4 192.168.0.32
+
+	log.Println("New sdp: ", newSdp)
 	//start RTP
 	log.SetFlags(log.Lshortfile)
 	value, err := scn.Fetch(sdp.CallbackAddr + sdp.CallbackSession)
@@ -267,7 +276,16 @@ func TestClient2(w http.ResponseWriter, r *http.Request, session sessions.Sessio
 	//decode base64
 	desdp, _ := b64.StdEncoding.DecodeString(sdp.SDP)
 	log.Println("SDP Decode: ", string(desdp))
-	mediaDesc, newSdp := sbpParser(desdp, aport, vport)
+	mediaDesc, _ := sbpParser(desdp, aport, vport)
+
+	log.Println("Old port: ", mediaDesc.audio.port)
+	log.Println("New port: ", aport)
+	s := string(desdp)
+	oip := mediaDesc.ip
+	oldport := strconv.Itoa(mediaDesc.audio.port)
+	newSdp := strings.Replace(s, oldport, aport, -1)
+	newSdp = strings.Replace(newSdp, "c=IN IP4 "+oip, "c=IN IP4 "+conf.Conf.Localip, -1)
+
 	log.Println(mediaDesc.ip)
 	log.Println(newSdp)
 
@@ -397,7 +415,7 @@ func sbpParser(sdpByte []byte, aport, vport string) (OriginSdp, string) {
 	newSdp := constructSdp(m)
 
 	//encode base64
-
+	//	log.Print("dddddddddddddddddd", orig.audio.port)
 	return orig, newSdp
 
 }
@@ -410,7 +428,7 @@ func constructSdp(me *sdp.Message) string {
 
 	// defining message
 	m := me
-	m.AddFlag("nortpproxy:yes")
+	//	m.AddFlag("nortpproxy:yes")
 
 	// appending message to session
 	s = m.Append(s)

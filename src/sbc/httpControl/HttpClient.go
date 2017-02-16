@@ -2,7 +2,7 @@ package httpControl
 
 import (
 	"bytes"
-	"fmt"
+	//	"fmt"
 	"io/ioutil"
 	// conf "sbc/conf"
 
@@ -10,7 +10,7 @@ import (
 	// "fmt"
 	// "github.com/jmcvetta/napping"
 	// "gopkg.in/jmcvetta/napping.v3"
-	// "log"
+	"log"
 	"net/http"
 )
 
@@ -31,10 +31,10 @@ func RequestHTTTP(host, data string) (string, error) {
 	}
 	defer resp.Body.Close()
 
-	fmt.Println("response Status:", resp.Status)
-	fmt.Println("response Headers:", resp.Header)
+	log.Println("response Status:", resp.Status)
+	log.Println("response Headers:", resp.Header)
 	body, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println("response Body:", string(body))
+	log.Println("response Body:", string(body))
 
 	return string(body), nil
 }
