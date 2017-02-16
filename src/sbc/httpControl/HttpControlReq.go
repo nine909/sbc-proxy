@@ -65,11 +65,11 @@ func Hello(w http.ResponseWriter, r *http.Request, session sessions.Session, ps 
 	var wg sync.WaitGroup
 	// var sbc *Sbc
 	port := ps["portgu"]
-
+	oldPort := "127.0.0.1:1234"
 	wg.Add(1)
 	go func(wg *sync.WaitGroup) {
 		defer wg.Done()
-		sbc.StartServer(port)
+		sbc.StartServer(oldPort, port)
 
 	}(&wg)
 	wg.Wait()
@@ -204,10 +204,11 @@ func TestClient(w http.ResponseWriter, r *http.Request, session sessions.Session
 	var wg sync.WaitGroup
 	// var sbc *Sbc
 
+	oldPort := "127.0.0.1:1234"
 	wg.Add(1)
 	go func(wg *sync.WaitGroup) {
 		defer wg.Done()
-		sbc.StartServer(aport)
+		sbc.StartServer(oldPort, aport)
 		//		sbc.StartServer(vport)
 
 	}(&wg)
@@ -318,10 +319,11 @@ func TestClient2(w http.ResponseWriter, r *http.Request, session sessions.Sessio
 	var wg sync.WaitGroup
 	// var sbc *Sbc
 
+	oldPort := "127.0.0.1:1234"
 	wg.Add(1)
 	go func(wg *sync.WaitGroup) {
 		defer wg.Done()
-		sbc.StartServer(aport)
+		sbc.StartServer(oldPort, aport)
 		//		sbc.StartServer(vport)
 
 	}(&wg)

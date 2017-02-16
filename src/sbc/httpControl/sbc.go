@@ -18,7 +18,8 @@ type Sbc struct {
 }
 
 type Client struct {
-	addr *net.UDPAddr
+	// addr *net.UDPAddr
+	addr net.Conn
 }
 
 func NewSBCServer() *Sbc {
@@ -48,8 +49,13 @@ func (sbc *Sbc) Open(port string) (*net.UDPConn, error) {
 	return ser, nil
 }
 
-func (sbc *Sbc) StartServer(port string) error {
+func (sbc *Sbc) StartServer(addr, port string) error {
 	log.Println("UDP Server Starting...")
+	connOld, err := net.Dial("udp", addr)
+	if err != nil {
+		fmt.Printf("Some error %v", err)
+		return err
+	}
 	conn, err := sbc.Open(port)
 	if err != nil {
 		fmt.Printf("Some error %v\n", err)
@@ -60,6 +66,8 @@ func (sbc *Sbc) StartServer(port string) error {
 	} else {
 		conn = val
 	}
+
+	sbc.clients[conn] = Client{addr: connOld}
 	log.Println("UDP Server Started!!!")
 	go sbc.UDPServer(conn)
 	return nil
@@ -84,7 +92,8 @@ func (sbc *Sbc) sendResponse(conn *net.UDPConn, p []byte) {
 		if key != conn {
 			// n, err := key.WriteToUDP([]byte("From server: Hello I got your mesage \n"), sbc.clients[key].addr)
 			log.Println("Send to ", key, sbc.clients[key].addr)
-			n, err := key.WriteToUDP(p, sbc.clients[key].addr)
+			// n, err := key.WriteToUDP(p, sbc.clients[key].addr)
+			n, err := sbc.clients[key].addr.Write(p)
 			if err != nil {
 				fmt.Println("Couldn't send response %v", err)
 			}
@@ -109,17 +118,18 @@ func (sbc *Sbc) UDPServer(conn *net.UDPConn) error {
 			return err
 		}
 
-		log.Println("Remote Address:", remoteaddr)
-		client := Client{addr: remoteaddr}
-		if val, ok := sbc.clients[conn]; !ok {
-			log.Println("Added New Client:", client.addr)
-		} else {
-			log.Println("Client is Existed:", val.addr)
-			log.Println("Update Client:", client.addr)
-		}
-		sbc.clients[conn] = client
+		// log.Println("Remote Address:", remoteaddr)
+		// client := Client{addr: remoteaddr}
+		// if val, ok := sbc.clients[conn]; !ok {
+		// 	log.Println("Added New Client:", client.addr)
+		// } else {
+		// 	log.Println("Client is Existed:", val.addr)
+		// 	log.Println("Update Client:", client.addr)
+		// }
+		// sbc.clients[conn] = client
 
-		log.Println("Client UDPAddr:", sbc.clients[conn])
+		// log.Println("Client UDPAddr:", sbc.clients[conn])
+
 		// sbc.MapUDPAddrs[ser] = remoteaddr
 		// log.Println("MapUDPAddress:", sbc.MapUDPAddrs[ser])
 		fmt.Printf("Read a message from %v %s \n", remoteaddr, p)
