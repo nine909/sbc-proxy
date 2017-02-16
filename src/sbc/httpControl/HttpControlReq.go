@@ -195,6 +195,11 @@ func TestClient(w http.ResponseWriter, r *http.Request, session sessions.Session
 	sbc := value.(*Sbc)
 	log.Println("Session get ", sdp.CallbackAddr+sdp.CallbackSession, sbc)
 
+	for key := range sbc.clients {
+		log.Println("KeyName:", key)
+
+	}
+
 	log.Println(sbc)
 	var wg sync.WaitGroup
 	// var sbc *Sbc
@@ -203,7 +208,7 @@ func TestClient(w http.ResponseWriter, r *http.Request, session sessions.Session
 	go func(wg *sync.WaitGroup) {
 		defer wg.Done()
 		sbc.StartServer(aport)
-		sbc.StartServer(vport)
+		//		sbc.StartServer(vport)
 
 	}(&wg)
 	wg.Wait()
@@ -304,6 +309,11 @@ func TestClient2(w http.ResponseWriter, r *http.Request, session sessions.Sessio
 
 	sbc := value.(*Sbc)
 	log.Println("Session get ", sdp.CallbackAddr+sdp.CallbackSession, sbc)
+
+	for key := range sbc.clients {
+		log.Println("KeyName:", key)
+
+	}
 	log.Println(sbc)
 	var wg sync.WaitGroup
 	// var sbc *Sbc
@@ -312,7 +322,7 @@ func TestClient2(w http.ResponseWriter, r *http.Request, session sessions.Sessio
 	go func(wg *sync.WaitGroup) {
 		defer wg.Done()
 		sbc.StartServer(aport)
-		sbc.StartServer(vport)
+		//		sbc.StartServer(vport)
 
 	}(&wg)
 	wg.Wait()
