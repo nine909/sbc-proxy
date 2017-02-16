@@ -391,7 +391,7 @@ func sbpParser(sdpByte []byte, aport, vport string) (OriginSdp, string) {
 	// defining medias
 	m.Medias = medias1
 	//replace ip
-	m.Origin.Address = conf.Conf.Localip
+	//	m.Origin.Address = conf.Conf.Localip
 	m.Connection.IP = net.ParseIP(conf.Conf.Localip)
 
 	newSdp := constructSdp(m)
@@ -410,7 +410,7 @@ func constructSdp(me *sdp.Message) string {
 
 	// defining message
 	m := me
-	// m.AddFlag("recvonly")
+	m.AddFlag("nortpproxy:yes")
 
 	// appending message to session
 	s = m.Append(s)
