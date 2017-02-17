@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"strconv"
 )
 
 type service interface {
@@ -15,11 +16,13 @@ type service interface {
 type Sbc struct {
 	portOpened map[string]*net.UDPConn
 	clients    map[*net.UDPConn]Client
+	remoteAddr string
 }
 
 type Client struct {
-	// addr *net.UDPAddr
-	addr net.Conn
+	addr                  *net.UDPAddr
+	connForward           *net.UDPConn
+	remoteAddr, localAddr *net.UDPAddr
 }
 
 func NewSBCServer() *Sbc {
@@ -49,13 +52,9 @@ func (sbc *Sbc) Open(port string) (*net.UDPConn, error) {
 	return ser, nil
 }
 
-func (sbc *Sbc) StartServer(addr, port string) error {
+func (sbc *Sbc) StartServer(rAddr, port string) error {
 	log.Println("UDP Server Starting...")
-	connOld, err := net.Dial("udp", addr)
-	if err != nil {
-		fmt.Printf("Some error %v", err)
-		return err
-	}
+
 	conn, err := sbc.Open(port)
 	if err != nil {
 		fmt.Printf("Some error %v\n", err)
@@ -67,11 +66,33 @@ func (sbc *Sbc) StartServer(addr, port string) error {
 		conn = val
 	}
 
-	sbc.clients[conn] = Client{addr: connOld}
+	client := Client{}
+	client.AddRemoteAddress(rAddr)
+	sbc.clients[conn] = client
 	log.Println("UDP Server Started!!!")
 	go sbc.UDPServer(conn)
 	return nil
 }
+
+// func (c *Client) findSendTo(conn *net.UDPConn) (*net.UDPConn, error) {
+// 	raddr, err := net.ResolveUDPAddr("udp", c.raddr)
+// 	if err != nil {
+// 		fmt.Printf("Some error %v\n", err)
+// 		return nil, err
+// 	}
+// 	laddr, err := net.ResolveUDPAddr("udp", ":"+c.port)
+// 	if err != nil {
+// 		fmt.Printf("Some error %v\n", err)
+// 		return nil, err
+// 	}
+// 	connOld, err := net.DialUDP("udp", laddr, raddr)
+// 	if err != nil {
+// 		fmt.Printf("Some error %v", err)
+// 		return nil, err
+// 	}
+
+// 	return connOld, nil
+// }
 
 func (sbc *Sbc) DeletePort() {
 
@@ -92,12 +113,12 @@ func (sbc *Sbc) sendResponse(conn *net.UDPConn, p []byte) {
 		if key != conn {
 			// n, err := key.WriteToUDP([]byte("From server: Hello I got your mesage \n"), sbc.clients[key].addr)
 			log.Println("Send to ", key, sbc.clients[key].addr)
-			// n, err := key.WriteToUDP(p, sbc.clients[key].addr)
-			n, err := sbc.clients[key].addr.Write(p)
+			n, err := key.WriteToUDP(p, sbc.clients[key].addr)
 			if err != nil {
 				fmt.Println("Couldn't send response %v", err)
 			}
 			fmt.Println(n, err)
+
 		}
 
 	}
@@ -117,8 +138,8 @@ func (sbc *Sbc) UDPServer(conn *net.UDPConn) error {
 			// continue
 			return err
 		}
-
-		// log.Println("Remote Address:", remoteaddr)
+		sbc.findSender(conn)
+		log.Println("Remote Address Reader:", remoteaddr)
 		// client := Client{addr: remoteaddr}
 		// if val, ok := sbc.clients[conn]; !ok {
 		// 	log.Println("Added New Client:", client.addr)
@@ -134,6 +155,91 @@ func (sbc *Sbc) UDPServer(conn *net.UDPConn) error {
 		// log.Println("MapUDPAddress:", sbc.MapUDPAddrs[ser])
 		fmt.Printf("Read a message from %v %s \n", remoteaddr, p)
 
-		go sbc.sendResponse(conn, p)
+		// go sbc.sendResponse(conn, p)
+
+		go sbc.sendTo(conn, p)
 	}
+
+}
+
+// func (sbc *Sbc) SendTo(lAddr, rAddr string) {
+// 	// rAddr = "127.0.0.1:10001"
+// 	ServerAddr, err := net.ResolveUDPAddr("udp", rAddr)
+// 	if err != nil {
+// 		fmt.Println("Error: ", err)
+// 	}
+
+// 	LocalAddr = sbc.portOpened[lAddr]
+
+// 	if
+// 	Conn, err := net.DialUDP("udp", LocalAddr, ServerAddr)
+// 	if err != nil {
+// 		fmt.Println("Error: ", err)
+// 	}
+// 	defer Conn.Close()
+// 	for {
+// 		_, err := Conn.Write(buf)
+// 		if err != nil {
+// 			fmt.Println(msg, err)
+// 		}
+// 	}
+
+// }
+
+func (sbc *Sbc) findSender(conn *net.UDPConn) {
+	connForward := sbc.clients[conn].connForward
+	if connForward != nil {
+		for key, val := range sbc.portOpened {
+			log.Println("KeyName:", key)
+			if val != conn {
+				udpPort, _ := strconv.Atoi(key)
+				addr := net.UDPAddr{
+					Port: udpPort,
+					IP:   net.ParseIP(""),
+				}
+				c := sbc.clients[conn]
+				c.localAddr = &addr
+				break
+			}
+		}
+		conToRemote, err := net.DialUDP("udp", sbc.clients[conn].localAddr, sbc.clients[conn].remoteAddr)
+		if err != nil {
+			fmt.Printf("Some error %v", err)
+			return
+		}
+		c := sbc.clients[conn]
+		c.connForward = conToRemote
+	}
+}
+
+func (c *Client) AddRemoteAddress(rAddr string) {
+	log.Println("Remote Address:", rAddr)
+	if c.remoteAddr == nil {
+		remoteAddr, err := net.ResolveUDPAddr("udp", rAddr)
+		if err != nil {
+			fmt.Println("Error: ", err)
+		}
+		c.remoteAddr = remoteAddr
+	}
+	log.Println("Remote UDPAddr:", c.remoteAddr.String())
+}
+
+func (sbc *Sbc) sendTo(conn *net.UDPConn, p []byte) {
+
+	c := sbc.clients[conn]
+	log.Println(c.connForward)
+	log.Println(conn)
+	if c.connForward == nil {
+		return
+	}
+	log.Println("Recieved By Remote", conn.LocalAddr().String())
+	log.Println("Recieved By Local", conn.RemoteAddr().String())
+	log.Println("Send From Local", sbc.clients[conn].connForward.LocalAddr().String())
+	log.Println("Send to ", c.connForward.RemoteAddr().String())
+	n, err := c.connForward.WriteToUDP(p, c.remoteAddr)
+	if err != nil {
+		fmt.Println("Couldn't send response %v", err)
+	}
+	fmt.Println(n, err)
+
 }
