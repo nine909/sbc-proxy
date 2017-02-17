@@ -320,7 +320,135 @@ func rtpMapping(session, uri, port string) {
 
 	log.Println("Session increment ", session, sbc)
 }
+func UnResoreceAllocate1(w http.ResponseWriter, r *http.Request, session sessions.Session, ps martini.Params) {
 
-func UnResoreceAllocate(w http.ResponseWriter, r *http.Request, session sessions.Session, ps martini.Params) {
+	decoder := json.NewDecoder(r.Body)
+	var sdp sdpMessages
+	err := decoder.Decode(&sdp)
+	if err != nil {
+		panic(err)
+	}
+	defer r.Body.Close()
 
+	log.Println("SDP Encode: ", sdp.SDP)
+	log.Println("SDP X-Session: ", sdp.XSession)
+	log.Println("SDP result code: ", sdp.Resultcode)
+	log.Println("SDP dev msg code: ", sdp.Deverlopermessage)
+
+	log.Println("Send request To P-WRTC ", sdp.CallbackAddr)
+	ccrt := msg.ConstructCCR_T(sdp.CallbackSession)
+
+	an, errhttp := RequestHTTTP(sdp.CallbackAddr+"/CCR-T/"+sdp.CallbackSession+"?", ccrt)
+	if errhttp != nil {
+		fmt.Fprintf(w, "error")
+		return
+	}
+
+	log.Println("Recieve response from P-WRTC")
+	log.Println("Data: ", an)
+
+	//start RTP
+	log.Println("Delete Handler")
+	value, err := scn.Fetch(sdp.CallbackAddr + sdp.CallbackSession)
+	if err != nil {
+		log.Println(err)
+	}
+	sbc := value.(*Sbc)
+	// log.Println("SBC Clients:", sbc.portOpened)
+	// for key := range sbc.clients {
+	// 	log.Println("sbc.Client: ", sbc.clients[key].addr)
+	// }
+
+	sbc.DeletePort()
+
+	//end rtp
+
+	//encode base64
+	sdpRes := &sdpMessages{
+		SDP:               sdp.SDP,
+		XSession:          sdp.XSession,
+		CallbackAddr:      sdp.CallbackAddr,
+		CallbackSession:   sdp.CallbackSession,
+		Resultcode:        "200",
+		Deverlopermessage: "OK"}
+
+	res2B, _ := json.Marshal(sdpRes)
+	fmt.Println(string(res2B))
+	fmt.Fprintf(w, string(res2B))
+}
+func UnResoreceAllocate2(w http.ResponseWriter, r *http.Request, session sessions.Session, ps martini.Params) {
+	// uid := r.FormValue("uid")
+	//	uid := ps.ByName("uid")
+	//	fmt.Println(r.))
+	//	fmt.Fprintf(w, "you are add user %s", uid)
+	decoder := json.NewDecoder(r.Body)
+	var sdp sdpMessages
+	err := decoder.Decode(&sdp)
+	if err != nil {
+		panic(err)
+	}
+	defer r.Body.Close()
+
+	log.Println("SDP Encode: ", sdp.SDP)
+	log.Println("SDP X-Session: ", sdp.XSession)
+
+	log.Println("Send request To P-WRTC ", sdp.CallbackAddr)
+	//	ccri := msg.ConstructCCR_I()
+
+	//	an := RequestHTTTP(sdp.CallbackAddr, ccri)
+
+	//	log.Println("Recieve response from P-WRTC")
+	//	log.Println("Data: ", an)
+
+	var aport string
+	var vport string
+	for {
+		ap := rand.Int()
+		vp := rand.Int()
+		aport = strconv.Itoa(int(ap))[:5]
+		vport = strconv.Itoa(int(vp))[:5]
+		_, aerr := net.ResolveUDPAddr("udp", ":"+aport)
+		_, verr := net.ResolveUDPAddr("udp", ":"+vport)
+		if aerr == nil && verr == nil {
+			log.Println("new audio port:", aport)
+			log.Println("new video port:", vport)
+			break
+		}
+	}
+
+	//decode base64
+	desdp, _ := b64.StdEncoding.DecodeString(sdp.SDP)
+	log.Println("SDP Decode: ", string(desdp))
+	mediaDesc := SdpParser(desdp, aport, vport)
+
+	log.Println("Old port: ", mediaDesc.audio.port)
+	log.Println("New port: ", aport)
+	s := string(desdp)
+	oip := mediaDesc.ip
+	oldport := strconv.Itoa(mediaDesc.audio.port)
+	newSdp := strings.Replace(s, oldport, aport, -1)
+	newSdp = strings.Replace(newSdp, "c=IN IP4 "+oip, "c=IN IP4 "+conf.Conf.Localip, -1)
+
+	log.Println(mediaDesc.ip)
+	log.Println(newSdp)
+
+	//start RTP
+
+	// rtpMapping(sdp.CallbackAddr+sdp.CallbackSession, mediaDesc.ip+":"+oldport, aport)
+
+	//end rtp
+
+	//encode base64
+	sEnc := b64.StdEncoding.EncodeToString([]byte(newSdp))
+	// fmt.Fprintf(w, sEnc)
+	sdpRes := &sdpMessages{
+		SDP:               sEnc,
+		XSession:          sdp.XSession,
+		CallbackAddr:      sdp.CallbackAddr,
+		CallbackSession:   sdp.CallbackSession,
+		Resultcode:        "200",
+		Deverlopermessage: "OK"}
+	res2B, _ := json.Marshal(sdpRes)
+	fmt.Println(string(res2B))
+	fmt.Fprintf(w, string(res2B))
 }
