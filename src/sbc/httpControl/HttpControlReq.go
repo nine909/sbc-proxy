@@ -17,10 +17,6 @@ import (
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/sessions"
 
-	//	"io"
-	//	"io/ioutil"
-
-	"github.com/ernado/sdp"
 	//	"os"
 	"strconv"
 	"sync"
@@ -31,11 +27,10 @@ import (
 // var OrigSdp OriginSdp
 
 type sdpMessages struct {
-	SDP             string
-	XSession        string `json:"x-session"`
-	CallbackAddr    string `json:"Callback-Address"`
-	CallbackSession string `json:"Callback-Session"`
-
+	SDP               string
+	XSession          string `json:"x-session"`
+	CallbackAddr      string `json:"Callback-Address"`
+	CallbackSession   string `json:"Callback-Session"`
 	Resultcode        string `json:"resultcode"`
 	Deverlopermessage string `json:"deverlopermessage"`
 }
@@ -172,7 +167,7 @@ func TestClient(w http.ResponseWriter, r *http.Request, session sessions.Session
 	//decode base64
 	desdp, _ := b64.StdEncoding.DecodeString(sdp.SDP)
 	log.Println("SDP Decode: ", string(desdp))
-	mediaDesc := sbpParser(desdp, aport, vport)
+	mediaDesc := SdpParser(desdp, aport, vport)
 	log.Println(mediaDesc.ip)
 
 	log.Println("Old port: ", mediaDesc.audio.port)
@@ -186,45 +181,8 @@ func TestClient(w http.ResponseWriter, r *http.Request, session sessions.Session
 
 	log.Println("New sdp: ", newSdp)
 	//start RTP
-	log.SetFlags(log.Lshortfile)
-	value, err := scn.Fetch(sdp.CallbackAddr + sdp.CallbackSession)
-	if err != nil {
-		log.Println(err)
-		value = NewSBCServer()
-	}
-	sbc := value.(*Sbc)
-	log.Println("Session get ", sdp.CallbackAddr+sdp.CallbackSession, sbc)
 
-	for key := range sbc.clients {
-		log.Println("KeyName:", key, sbc.clients[key].addr)
-
-	}
-
-	log.Println(sbc)
-	var wg sync.WaitGroup
-	// var sbc *Sbc
-
-	oldPort := "127.0.0.1:1234"
-	wg.Add(1)
-	go func(wg *sync.WaitGroup) {
-		defer wg.Done()
-		sbc.StartServer(oldPort, aport)
-		//		sbc.StartServer(vport)
-
-	}(&wg)
-	wg.Wait()
-	log.Println("UPDServer : ", sbc)
-	log.Println("SBC Clients:", sbc.clients)
-	for key := range sbc.clients {
-		log.Println("sbc.Client: ", sbc.clients[key].addr)
-	}
-
-	errStore := scn.Store(sdp.CallbackAddr+sdp.CallbackSession, sbc)
-	if errStore != nil {
-		log.Println(errStore)
-	}
-
-	log.Println("Session get ", sdp.CallbackAddr+sdp.CallbackSession, sbc)
+	rtpMapping(sdp.CallbackAddr+sdp.CallbackSession, mediaDesc.ip+":"+oldport, aport)
 
 	//end rtp
 
@@ -287,7 +245,7 @@ func TestClient2(w http.ResponseWriter, r *http.Request, session sessions.Sessio
 	//decode base64
 	desdp, _ := b64.StdEncoding.DecodeString(sdp.SDP)
 	log.Println("SDP Decode: ", string(desdp))
-	mediaDesc := sbpParser(desdp, aport, vport)
+	mediaDesc := SdpParser(desdp, aport, vport)
 
 	log.Println("Old port: ", mediaDesc.audio.port)
 	log.Println("New port: ", aport)
@@ -301,45 +259,9 @@ func TestClient2(w http.ResponseWriter, r *http.Request, session sessions.Sessio
 	log.Println(newSdp)
 
 	//start RTP
-	log.SetFlags(log.Lshortfile)
-	value, err := scn.Fetch(sdp.CallbackAddr + sdp.CallbackSession)
-	if err != nil {
-		log.Println(err)
-		value = NewSBCServer()
-	}
 
-	sbc := value.(*Sbc)
-	log.Println("Session get ", sdp.CallbackAddr+sdp.CallbackSession, sbc)
+	rtpMapping(sdp.CallbackAddr+sdp.CallbackSession, mediaDesc.ip+":"+oldport, aport)
 
-	for key := range sbc.clients {
-		log.Println("KeyName:", key, sbc.clients[key].addr)
-
-	}
-	log.Println(sbc)
-	var wg sync.WaitGroup
-	// var sbc *Sbc
-
-	oldPort := "127.0.0.1:1234"
-	wg.Add(1)
-	go func(wg *sync.WaitGroup) {
-		defer wg.Done()
-		sbc.StartServer(oldPort, aport)
-		//		sbc.StartServer(vport)
-
-	}(&wg)
-	wg.Wait()
-	log.Println("UPDServer : ", sbc)
-	log.Println("SBC Clients:", sbc.clients)
-	for key := range sbc.clients {
-		log.Println("sbc.Client: ", sbc.clients[key].addr)
-	}
-
-	errStore := scn.Store(sdp.CallbackAddr+sdp.CallbackSession, sbc)
-	if errStore != nil {
-		log.Println(errStore)
-	}
-
-	log.Println("Session increment ", sdp.CallbackAddr+sdp.CallbackSession, sbc)
 	//end rtp
 
 	//encode base64
@@ -356,115 +278,177 @@ func TestClient2(w http.ResponseWriter, r *http.Request, session sessions.Sessio
 	fmt.Println(string(res2B))
 	fmt.Fprintf(w, string(res2B))
 }
-func sbpParser(sdpByte []byte, aport, vport string) OriginSdp {
-	var (
-		s   sdp.Session
-		err error
-	)
 
-	if s, err = sdp.DecodeSession(sdpByte, s); err != nil {
-		log.Fatal("err:", err)
+func rtpMapping(session, uri, port string) {
+
+	log.SetFlags(log.Lshortfile)
+	value, err := scn.Fetch(session)
+	if err != nil {
+		log.Println(err)
+		value = NewSBCServer()
 	}
-	// for k, v := range s {
-	// 	fmt.Println(k, v)
+
+	sbc := value.(*Sbc)
+	log.Println("Session get ", session, sbc)
+
+	for key := range sbc.clients {
+		log.Println("KeyName:", key, sbc.clients[key].addr)
+
+	}
+	log.Println(sbc)
+	var wg sync.WaitGroup
+	// var sbc *Sbc
+
+	wg.Add(1)
+	go func(wg *sync.WaitGroup) {
+		defer wg.Done()
+		sbc.StartServer(uri, port)
+		//		sbc.StartServer(vport)
+
+	}(&wg)
+	wg.Wait()
+	log.Println("UPDServer : ", sbc)
+	log.Println("SBC Clients:", sbc.clients)
+	for key := range sbc.clients {
+		log.Println("sbc.Client: ", sbc.clients[key].addr)
+	}
+
+	errStore := scn.Store(session, sbc)
+	if errStore != nil {
+		log.Println(errStore)
+	}
+
+	log.Println("Session increment ", session, sbc)
+}
+func UnResoreceAllocate1(w http.ResponseWriter, r *http.Request, session sessions.Session, ps martini.Params) {
+
+	decoder := json.NewDecoder(r.Body)
+	var sdp sdpMessages
+	err := decoder.Decode(&sdp)
+	if err != nil {
+		panic(err)
+	}
+	defer r.Body.Close()
+
+	log.Println("SDP Encode: ", sdp.SDP)
+	log.Println("SDP X-Session: ", sdp.XSession)
+	log.Println("SDP result code: ", sdp.Resultcode)
+	log.Println("SDP dev msg code: ", sdp.Deverlopermessage)
+
+	log.Println("Send request To P-WRTC ", sdp.CallbackAddr)
+	ccrt := msg.ConstructCCR_T(sdp.CallbackSession)
+
+	an, errhttp := RequestHTTTP(sdp.CallbackAddr+"/CCR-T/"+sdp.CallbackSession+"?", ccrt)
+	if errhttp != nil {
+		fmt.Fprintf(w, "error")
+		return
+	}
+
+	log.Println("Recieve response from P-WRTC")
+	log.Println("Data: ", an)
+
+	//start RTP
+	log.Println("Delete Handler")
+	value, err := scn.Fetch(sdp.CallbackAddr + sdp.CallbackSession)
+	if err != nil {
+		log.Println(err)
+	}
+	sbc := value.(*Sbc)
+	// log.Println("SBC Clients:", sbc.portOpened)
+	// for key := range sbc.clients {
+	// 	log.Println("sbc.Client: ", sbc.clients[key].addr)
 	// }
-	d := sdp.NewDecoder(s)
-	m := new(sdp.Message)
-	if err = d.Decode(m); err != nil {
-		log.Fatal("err:", err)
-	}
-	log.Println("Decoded session", m.Name)
-	log.Println("Info:", m.Info)
-	log.Println("Origin:", m.Origin)
-	log.Println("IP 4: ", m.Origin.Address)
-	log.Println("IP 4: ", m.Timing)
-	log.Println("NetworkType: ", m.Connection.NetworkType)
-	log.Println("AddressType: ", m.Connection.AddressType)
-	log.Println("IP: ", m.Connection.IP)
-	log.Println("TTL: ", m.Connection.TTL)
-	log.Println("Addresses: ", m.Connection.Addresses)
 
-	orig := OriginSdp{}
-	medias1 := sdp.Medias{}
+	sbc.DeletePort()
 
-	orig.ip = m.Origin.Address
-	isMultiMediaAudio := false
-	isMultiMediaVideo := false
-	// var isRemove []int
-	for i, media := range m.Medias {
-		log.Println("=======================")
-		log.Println("Type: ", media.Description.Type)
-		log.Println("Port: ", media.Description.Port)
-		log.Println("PortsNumber: ", media.Description.PortsNumber)
-		log.Println("Protocol: ", media.Description.Protocol)
-		log.Println("Format: ", media.Description.Format)
-		log.Println("Medias Connection: ", media.Connection)
-		log.Println("Medias Attributes: ", media.Attributes)
-		log.Println("Medias Encryption: ", media.Encryption)
-		log.Println("Medias Bandwidths: ", media.Bandwidths)
+	//end rtp
 
-		switch media.Description.Type {
-		case "audio":
-			if !isMultiMediaAudio {
-				orig.audio.port = media.Description.Port
-				orig.audio.portsNumber = media.Description.PortsNumber
-				orig.audio.protocal = media.Description.Protocol
-
-				isMultiMediaAudio = true
-				medias1 = append(medias1, m.Medias[i])
-			}
-		case "video":
-			if !isMultiMediaVideo {
-				orig.video.port = media.Description.Port
-				orig.video.portsNumber = media.Description.PortsNumber
-				orig.video.protocal = media.Description.Protocol
-
-				isMultiMediaVideo = true
-				medias1 = append(medias1, m.Medias[i])
-			}
-		}
-
-	}
-	// defining medias
-	m.Medias = medias1
-	//replace ip
-	//	m.Origin.Address = conf.Conf.Localip
-	m.Connection.IP = net.ParseIP(conf.Conf.Localip)
 	//encode base64
-	//	log.Print("dddddddddddddddddd", orig.audio.port)
-	return orig
+	sdpRes := &sdpMessages{
+		SDP:               sdp.SDP,
+		XSession:          sdp.XSession,
+		CallbackAddr:      sdp.CallbackAddr,
+		CallbackSession:   sdp.CallbackSession,
+		Resultcode:        "200",
+		Deverlopermessage: "OK"}
 
+	res2B, _ := json.Marshal(sdpRes)
+	fmt.Println(string(res2B))
+	fmt.Fprintf(w, string(res2B))
 }
-
-func constructSdp(me *sdp.Message) string {
-	var (
-		s sdp.Session
-		b []byte
-	)
-
-	// defining message
-	m := me
-	//	m.AddFlag("nortpproxy:yes")
-
-	// appending message to session
-	s = m.Append(s)
-
-	// appending session to byte buffer
-	b = s.AppendTo(b)
-	log.Println("SDP Construct :", string(b)+"\n")
-	return string(b) + "\n"
-}
-
-type OriginSdp struct {
-	ip    string
-	audio struct {
-		port        int
-		portsNumber int
-		protocal    string
+func UnResoreceAllocate2(w http.ResponseWriter, r *http.Request, session sessions.Session, ps martini.Params) {
+	// uid := r.FormValue("uid")
+	//	uid := ps.ByName("uid")
+	//	fmt.Println(r.))
+	//	fmt.Fprintf(w, "you are add user %s", uid)
+	decoder := json.NewDecoder(r.Body)
+	var sdp sdpMessages
+	err := decoder.Decode(&sdp)
+	if err != nil {
+		panic(err)
 	}
-	video struct {
-		port        int
-		portsNumber int
-		protocal    string
+	defer r.Body.Close()
+
+	log.Println("SDP Encode: ", sdp.SDP)
+	log.Println("SDP X-Session: ", sdp.XSession)
+
+	log.Println("Send request To P-WRTC ", sdp.CallbackAddr)
+	//	ccri := msg.ConstructCCR_I()
+
+	//	an := RequestHTTTP(sdp.CallbackAddr, ccri)
+
+	//	log.Println("Recieve response from P-WRTC")
+	//	log.Println("Data: ", an)
+
+	var aport string
+	var vport string
+	for {
+		ap := rand.Int()
+		vp := rand.Int()
+		aport = strconv.Itoa(int(ap))[:5]
+		vport = strconv.Itoa(int(vp))[:5]
+		_, aerr := net.ResolveUDPAddr("udp", ":"+aport)
+		_, verr := net.ResolveUDPAddr("udp", ":"+vport)
+		if aerr == nil && verr == nil {
+			log.Println("new audio port:", aport)
+			log.Println("new video port:", vport)
+			break
+		}
 	}
+
+	//decode base64
+	desdp, _ := b64.StdEncoding.DecodeString(sdp.SDP)
+	log.Println("SDP Decode: ", string(desdp))
+	mediaDesc := SdpParser(desdp, aport, vport)
+
+	log.Println("Old port: ", mediaDesc.audio.port)
+	log.Println("New port: ", aport)
+	s := string(desdp)
+	oip := mediaDesc.ip
+	oldport := strconv.Itoa(mediaDesc.audio.port)
+	newSdp := strings.Replace(s, oldport, aport, -1)
+	newSdp = strings.Replace(newSdp, "c=IN IP4 "+oip, "c=IN IP4 "+conf.Conf.Localip, -1)
+
+	log.Println(mediaDesc.ip)
+	log.Println(newSdp)
+
+	//start RTP
+
+	// rtpMapping(sdp.CallbackAddr+sdp.CallbackSession, mediaDesc.ip+":"+oldport, aport)
+
+	//end rtp
+
+	//encode base64
+	sEnc := b64.StdEncoding.EncodeToString([]byte(newSdp))
+	// fmt.Fprintf(w, sEnc)
+	sdpRes := &sdpMessages{
+		SDP:               sEnc,
+		XSession:          sdp.XSession,
+		CallbackAddr:      sdp.CallbackAddr,
+		CallbackSession:   sdp.CallbackSession,
+		Resultcode:        "200",
+		Deverlopermessage: "OK"}
+	res2B, _ := json.Marshal(sdpRes)
+	fmt.Println(string(res2B))
+	fmt.Fprintf(w, string(res2B))
 }

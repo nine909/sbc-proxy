@@ -80,3 +80,61 @@ func ConstructCCR_I(sesstion string) string {
 	log.Println(string(ccriJson))
 	return string(ccriJson)
 }
+func ConstructCCR_U(sesstion string) string {
+	ccru := &Credit_Control{}
+	ccru.SessionId = sesstion
+	ccru.AuthApplicationId = ""
+	ccru.ServiceContextId = ""
+	ccru.CCRequestType = "2"
+	ccru.CCRequestNumber = strconv.Itoa(seq + 1) //update to seq
+	ccru.EventTimestamp = "3679200292"
+	ccru.ServiceIdentifier = ""
+	ccru.RouteRecord = ""
+	ccru.SubscriptId = SubscriptionId{"dd", "ddd"}
+	ccru.ReqSernit.CCTime = ""
+	ccru.UsedSerUnit.CCTime = "180"
+	inInfo1 := INInformation{}
+	inInfo1.ChargeFlowType = ""
+	inInfo1.SSPTime = ""
+	inInfo1.TimeZone = ""
+	inInfo1.CallingPartyAddressNature = ""
+	inInfo1.CalledPartyAddressNature = ""
+	inInfo1.calledPartyBCDNumberNature = ""
+	inInfo1.EventTypeBCSM = ""
+
+	ccru.ServiceInfo.InInfo = inInfo1
+
+	ccruJson, _ := json.Marshal(ccru)
+	log.Println(string(ccruJson))
+	return string(ccruJson)
+}
+
+func ConstructCCR_T(sesstion string) string {
+	ccrt := &Credit_Control{}
+	ccrt.SessionId = sesstion
+	ccrt.AuthApplicationId = ""
+	ccrt.ServiceContextId = ""
+	ccrt.CCRequestType = "3"
+	ccrt.CCRequestNumber = strconv.Itoa(seq + 1) //update to seq
+	ccrt.EventTimestamp = "3679200292"
+	ccrt.ServiceIdentifier = ""
+	ccrt.RouteRecord = ""
+	ccrt.SubscriptId = SubscriptionId{"dd", "ddd"}
+	ccrt.ReqSernit.CCTime = ""
+	ccrt.UsedSerUnit.CCTime = "180"
+
+	inInfo1 := INInformation{}
+	inInfo1.ChargeFlowType = ""
+	inInfo1.SSPTime = ""
+	inInfo1.TimeZone = ""
+	inInfo1.CallingPartyAddressNature = ""
+	inInfo1.CalledPartyAddressNature = ""
+	inInfo1.calledPartyBCDNumberNature = ""
+	inInfo1.EventTypeBCSM = ""
+
+	ccrt.ServiceInfo.InInfo = inInfo1
+
+	ccrtJson, _ := json.Marshal(ccrt)
+	log.Println(string(ccrtJson))
+	return string(ccrtJson)
+}
