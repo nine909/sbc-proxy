@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"strings"
+	"time"
 
 	conf "sbc/conf"
 
@@ -259,7 +260,6 @@ func TestClient2(w http.ResponseWriter, r *http.Request, session sessions.Sessio
 	log.Println(newSdp)
 
 	//start RTP
-
 	rtpMapping(sdp.CallbackAddr+sdp.CallbackSession, mediaDesc.ip+":"+oldport, aport)
 
 	//end rtp
@@ -277,6 +277,7 @@ func TestClient2(w http.ResponseWriter, r *http.Request, session sessions.Sessio
 	res2B, _ := json.Marshal(sdpRes)
 	fmt.Println(string(res2B))
 	fmt.Fprintf(w, string(res2B))
+
 }
 
 func rtpMapping(session, uri, port string) {
@@ -451,4 +452,12 @@ func UnResoreceAllocate2(w http.ResponseWriter, r *http.Request, session session
 	res2B, _ := json.Marshal(sdpRes)
 	fmt.Println(string(res2B))
 	fmt.Fprintf(w, string(res2B))
+}
+func Ccru() {
+	for {
+		time.Sleep(10 * time.Second)
+		fmt.Println("Hello")
+
+	}
+
 }
