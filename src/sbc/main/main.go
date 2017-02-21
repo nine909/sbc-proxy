@@ -24,6 +24,7 @@ func main() {
 	m.Get("/hello/:portgu", httpControl.Hello)
 	m.Get("/delete", httpControl.DeleteWTF)
 	m.Get("/list", httpControl.Lists)
+	m.Get("/testflow", httpControl.TestFlow)
 
 	m.Post("/p-SSF/1.0.0/SBC/ResourceAllocate1/:uid", httpControl.TestClient)
 	m.Post("/p-SSF/1.0.0/SBC/ResourceAllocate2/:uid", httpControl.TestClient2)

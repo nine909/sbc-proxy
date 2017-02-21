@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"strings"
+	"time"
 
 	conf "sbc/conf"
 
@@ -44,6 +45,53 @@ func Index(w http.ResponseWriter, r *http.Request, session sessions.Session) {
 
 var scn = scene.Start()
 var keyStore = "sbc001"
+
+func TestFlow(w http.ResponseWriter, r *http.Request, session sessions.Session, ps martini.Params) {
+
+	log.SetFlags(log.Lshortfile)
+	fmt.Fprintf(w, "hello, %s!\n", ps["portgu"])
+
+	DoUDP("MO:uID2x0Xnpj", "MO", "127.0.0.1:7078", "61294")
+	time.Sleep(2 * time.Second)
+	DoUDP("MT:uID2x0Xnpj", "MT", "127.0.0.1:61294", "39165")
+	time.Sleep(2 * time.Second)
+	DoUDP("MT:uID2x0Xnpj", "MT", "127.0.0.1:8088", "60539")
+	time.Sleep(2 * time.Second)
+	DoUDP("MO:uID2x0Xnpj", "MO", "127.0.0.1:60539", "19762")
+
+}
+
+func DoUDP(session, handler, oldPort, port string) {
+	log.SetFlags(log.Lshortfile)
+
+	keyStore = session
+	value, err := scn.Fetch(keyStore)
+	if err != nil {
+		log.Println(err)
+		value = NewSBCServer()
+	}
+	sbc := value.(*Sbc)
+	log.Println(sbc)
+	sbc.handler = handler
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func(wg *sync.WaitGroup) {
+		defer wg.Done()
+		sbc.StartServer(oldPort, port)
+
+	}(&wg)
+	wg.Wait()
+	log.Println("UPDServer : ", sbc)
+	log.Println("SBC Clients:", sbc.clients)
+	for key, val := range sbc.clients {
+		log.Println("sbc.Client", key, val)
+	}
+
+	errStore := scn.Store(keyStore, sbc)
+	if errStore != nil {
+		log.Println(errStore)
+	}
+}
 
 func Hello(w http.ResponseWriter, r *http.Request, session sessions.Session, ps martini.Params) {
 
@@ -155,13 +203,15 @@ func TestClient(w http.ResponseWriter, r *http.Request, session sessions.Session
 		vp := rand.Int()
 		aport = strconv.Itoa(int(ap))[:5]
 		vport = strconv.Itoa(int(vp))[:5]
-		_, aerr := net.ResolveUDPAddr("udp", ":"+aport)
-		_, verr := net.ResolveUDPAddr("udp", ":"+vport)
-		if aerr == nil && verr == nil {
-			log.Println("new audio port:", aport)
-			log.Println("new video port:", vport)
-			break
-		}
+		break
+		// _, aerr := net.ResolveUDPAddr("udp", ":"+aport)
+		// _, verr := net.ResolveUDPAddr("udp", ":"+vport)
+		// if aerr == nil && verr == nil {
+		// 	log.Println("new audio port:", aport)
+		// 	log.Println("new video port:", vport)
+		// 	break
+		// }
+
 	}
 
 	//decode base64
@@ -182,7 +232,11 @@ func TestClient(w http.ResponseWriter, r *http.Request, session sessions.Session
 	log.Println("New sdp: ", newSdp)
 	//start RTP
 
-	rtpMapping(sdp.CallbackAddr+sdp.CallbackSession, mediaDesc.ip+":"+oldport, aport)
+	ss := strings.Split(sdp.CallbackSession, ":")
+	// ip, port := s[0], s[1]
+	handler := ss[0]
+
+	rtpMapping(sdp.CallbackAddr+sdp.CallbackSession, handler, mediaDesc.ip+":"+oldport, aport)
 
 	//end rtp
 
@@ -233,13 +287,14 @@ func TestClient2(w http.ResponseWriter, r *http.Request, session sessions.Sessio
 		vp := rand.Int()
 		aport = strconv.Itoa(int(ap))[:5]
 		vport = strconv.Itoa(int(vp))[:5]
-		_, aerr := net.ResolveUDPAddr("udp", ":"+aport)
-		_, verr := net.ResolveUDPAddr("udp", ":"+vport)
-		if aerr == nil && verr == nil {
-			log.Println("new audio port:", aport)
-			log.Println("new video port:", vport)
-			break
-		}
+		break
+		// _, aerr := net.ResolveUDPAddr("udp", ":"+aport)
+		// _, verr := net.ResolveUDPAddr("udp", ":"+vport)
+		// if aerr == nil && verr == nil {
+		// 	log.Println("new audio port:", aport)
+		// 	log.Println("new video port:", vport)
+		// 	break
+		// }
 	}
 
 	//decode base64
@@ -259,8 +314,10 @@ func TestClient2(w http.ResponseWriter, r *http.Request, session sessions.Sessio
 	log.Println(newSdp)
 
 	//start RTP
-
-	rtpMapping(sdp.CallbackAddr+sdp.CallbackSession, mediaDesc.ip+":"+oldport, aport)
+	ss := strings.Split(sdp.CallbackSession, ":")
+	// ip, port := s[0], s[1]
+	handler := ss[0]
+	rtpMapping(sdp.CallbackAddr+sdp.CallbackSession, handler, mediaDesc.ip+":"+oldport, aport)
 
 	//end rtp
 
@@ -279,7 +336,7 @@ func TestClient2(w http.ResponseWriter, r *http.Request, session sessions.Sessio
 	fmt.Fprintf(w, string(res2B))
 }
 
-func rtpMapping(session, uri, port string) {
+func rtpMapping(session, handler, uri, port string) {
 
 	log.SetFlags(log.Lshortfile)
 	value, err := scn.Fetch(session)
@@ -291,6 +348,7 @@ func rtpMapping(session, uri, port string) {
 	sbc := value.(*Sbc)
 	log.Println("Session get ", session, sbc)
 
+	sbc.handler = handler
 	for key := range sbc.clients {
 		log.Println("KeyName:", key, sbc.clients[key].addr)
 
