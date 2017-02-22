@@ -29,9 +29,6 @@ func main() {
 	m.Post("/p-SSF/1.0.0/SBC/ResourceAllocate1/:uid", httpControl.TestClient)
 	m.Post("/p-SSF/1.0.0/SBC/ResourceAllocate2/:uid", httpControl.TestClient2)
 	m.Post("/p-SSF/1.0.0/SBC/ResourceUnAllocate/:uid", httpControl.UnResoreceAllocate1)
-
-	go httpControl.Ccru()
-
 	fmt.Println("Base URL: localhost:" + config.HttpPort)
 	fmt.Println(http.ListenAndServe(":"+config.HttpPort, m))
 
