@@ -44,7 +44,7 @@ func SdpParser(sdpByte []byte, aport, vport string) OriginSdp {
 	orig := OriginSdp{}
 	medias1 := sdp.Medias{}
 
-	orig.ip = m.Connection.IP
+	orig.ip = string(m.Connection.IP)
 	isMultiMediaAudio := false
 	isMultiMediaVideo := false
 	// var isRemove []int
