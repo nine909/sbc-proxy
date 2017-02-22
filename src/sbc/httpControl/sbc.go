@@ -347,18 +347,19 @@ func (sbc *Sbc) sendTo(port string, p []byte) {
 			break
 		}
 	}
-
 	log.Println("c", c)
 	log.Println("c.sAddr", c.sAddr)
 	log.Println("c.localAddr", c.localAddr)
 	log.Println("c.remoteAddr", c.remoteAddr)
 	log.Println("c.connForward", c.connForward)
 	log.Println("c.OpenConn", c.OpenConn)
-	log.Println("c.OpenConn.LocalAddr()", c.OpenConn.LocalAddr())
-	log.Println("c.OpenConn.RemoteAddr()", c.OpenConn.RemoteAddr())
+
 	if c.OpenConn == nil {
 		return
 	}
+
+	log.Println("c.OpenConn.LocalAddr()", c.OpenConn.LocalAddr())
+	log.Println("c.OpenConn.RemoteAddr()", c.OpenConn.RemoteAddr())
 
 	log.Println("sbc.handler", sbc.handler)
 	if sbc.handler == "MO" && c.sAddr != nil {
