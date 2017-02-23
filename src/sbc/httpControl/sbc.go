@@ -7,6 +7,8 @@ import (
 	"strconv"
 	// "strings"
 	// "time"
+
+	conf "sbc/conf"
 )
 
 type service interface {
@@ -298,7 +300,9 @@ func (sbc *Sbc) ConnectToMO(port string) {
 		return
 	}
 
-	LocalAddr, err := net.ResolveUDPAddr("udp", "127.0.0.1:"+port)
+	localIp := conf.Conf.Localip
+	log.Println("localIp", localIp)
+	LocalAddr, err := net.ResolveUDPAddr("udp", localIp+":"+port)
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
