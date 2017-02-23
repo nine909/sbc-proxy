@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"sbc/logs"
 	"strconv"
 	// "strings"
 	// "time"
@@ -56,27 +57,27 @@ func (sbc *Sbc) Open(port string) (*net.UDPConn, error) {
 		fmt.Printf("Some error %v\n", err)
 		return nil, err
 	}
-	log.Println("Server Listener...", ser.LocalAddr().String())
+	logs.Logger.Debug("Server Listener...", ser.LocalAddr().String())
 	return ser, nil
 }
 
 func (sbc *Sbc) StartServer(rAddr, port string) error {
-	log.Println("UDP Server Starting...")
-	log.Println("PortOpen:", port)
-	log.Println("backTrack:", rAddr)
+	logs.Logger.Debug("UDP Server Starting...")
+	logs.Logger.Debug("PortOpen:", port)
+	logs.Logger.Debug("backTrack:", rAddr)
 
-	log.Println("sbc.clients:", sbc.clients)
+	logs.Logger.Debug("sbc.clients:", sbc.clients)
 	client := Client{remoteAddr: rAddr}
 	if sbc.handler == "MT" && len(sbc.clients) >= 1 {
-		log.Println("Connect to MO!!!")
+		logs.Logger.Debug("Connect to MO!!!")
 		client.isclient = true
 		sbc.clients[port] = client
 		sbc.ConnectToMO(port)
 		go sbc.UDPServer(port)
 	} else {
 
-		log.Println("PortOpen:", port)
-		log.Println("backTrack:", rAddr)
+		logs.Logger.Debug("PortOpen:", port)
+		logs.Logger.Debug("backTrack:", rAddr)
 
 		conn, err := sbc.Open(port)
 		if err != nil {
@@ -85,14 +86,14 @@ func (sbc *Sbc) StartServer(rAddr, port string) error {
 		}
 		client.OpenConn = conn
 		sbc.clients[port] = client
-		log.Println("UDP Server Started!!!")
+		logs.Logger.Debug("UDP Server Started!!!")
 		go sbc.UDPServer(port)
 	}
 	// if _, ok := sbc.clients[port]; !ok {
 	// 	client.OpenConn = conn
 	// }
-	log.Println("sbc.handler", sbc.handler)
-	log.Println("len(sbc.clients)", len(sbc.clients))
+	logs.Logger.Debug("sbc.handler", sbc.handler)
+	logs.Logger.Debug("len(sbc.clients)", len(sbc.clients))
 	return nil
 }
 
@@ -150,11 +151,11 @@ func (sbc *Sbc) UDPServer(port string) error {
 
 	conn := sbc.clients[port].OpenConn
 	c := sbc.clients[port]
-	log.Println("UDPDetail:", &conn)
+	logs.Logger.Debug("UDPDetail:", &conn)
 	// defer conn.Close()
 	for {
 		p := make([]byte, 2048)
-		log.Println("Waiting Incoming...", port)
+		logs.Logger.Debug("Waiting Incoming...", port)
 		// sbc.findSender(conn)
 		n, remoteaddr, err := conn.ReadFromUDP(p)
 		p = p[:n]
@@ -165,8 +166,8 @@ func (sbc *Sbc) UDPServer(port string) error {
 		}
 		sbc.findSender(port)
 		c.sAddr = remoteaddr
-		log.Println(c.sAddr)
-		log.Println("Remote Address Reader:", remoteaddr)
+		logs.Logger.Debug(c.sAddr)
+		logs.Logger.Debug("Remote Address Reader:", remoteaddr)
 		// client := Client{addr: remoteaddr}
 		// if val, ok := sbc.clients[conn]; !ok {
 		// 	log.Println("Added New Client:", client.addr)
@@ -184,7 +185,7 @@ func (sbc *Sbc) UDPServer(port string) error {
 
 		// go sbc.sendResponse(conn, p)
 
-		log.Printf("Read a message from %v %s \n", remoteaddr, p)
+		logs.Logger.Debug("Read a message from %v %s \n", remoteaddr, p)
 		sbc.clients[port] = c
 		go sbc.sendTo(port, p)
 		// go sbc.sendTo(conn, p)
@@ -193,19 +194,19 @@ func (sbc *Sbc) UDPServer(port string) error {
 }
 
 func (sbc *Sbc) findSender(port string) {
-	log.Println("Starting Finding Sender:", port)
+	logs.Logger.Debug("Starting Finding Sender:", port)
 
 	connCurrent := sbc.clients[port]
 
-	log.Println("connCurrent", connCurrent)
-	log.Println("connCurrent.sAddr", connCurrent.sAddr)
-	log.Println("connCurrent.localAddr", connCurrent.localAddr)
-	log.Println("connCurrent.remoteAddr", connCurrent.remoteAddr)
-	log.Println("connCurrent.connForward", connCurrent.connForward)
-	log.Println("connCurrent.OpenConn", connCurrent.OpenConn)
+	logs.Logger.Debug("connCurrent", connCurrent)
+	logs.Logger.Debug("connCurrent.sAddr", connCurrent.sAddr)
+	logs.Logger.Debug("connCurrent.localAddr", connCurrent.localAddr)
+	logs.Logger.Debug("connCurrent.remoteAddr", connCurrent.remoteAddr)
+	logs.Logger.Debug("connCurrent.connForward", connCurrent.connForward)
+	logs.Logger.Debug("connCurrent.OpenConn", connCurrent.OpenConn)
 
-	log.Println("Client range :", len(sbc.clients))
-	log.Println(sbc.clients)
+	logs.Logger.Debug("Client range :", len(sbc.clients))
+	logs.Logger.Debug(sbc.clients)
 	var c Client
 	for key, val := range sbc.clients {
 		if key != port {
@@ -221,14 +222,14 @@ func (sbc *Sbc) findSender(port string) {
 			break
 		}
 	}
-	log.Println("c", c)
-	log.Println("c.sAddr", c.sAddr)
-	log.Println("c.localAddr", c.localAddr)
-	log.Println("c.remoteAddr", c.remoteAddr)
-	log.Println("c.connForward", c.connForward)
-	log.Println("c.OpenConn", c.OpenConn)
+	logs.Logger.Debug("c", c)
+	logs.Logger.Debug("c.sAddr", c.sAddr)
+	logs.Logger.Debug("c.localAddr", c.localAddr)
+	logs.Logger.Debug("c.remoteAddr", c.remoteAddr)
+	logs.Logger.Debug("c.connForward", c.connForward)
+	logs.Logger.Debug("c.OpenConn", c.OpenConn)
 
-	log.Println("c.LocalAddr:", c.localAddr)
+	logs.Logger.Debug("c.LocalAddr:", c.localAddr)
 	if c.localAddr == nil {
 		return
 	}
@@ -258,19 +259,19 @@ func (sbc *Sbc) findSender(port string) {
 // }
 
 func (sbc *Sbc) ConnectToMO(port string) {
-	log.Println("ConnectToMO with Local:", port)
+	logs.Logger.Debug("ConnectToMO with Local:", port)
 
 	connCurrent := sbc.clients[port]
 
-	log.Println("connCurrent", connCurrent)
-	log.Println("connCurrent.sAddr", connCurrent.sAddr)
-	log.Println("connCurrent.localAddr", connCurrent.localAddr)
-	log.Println("connCurrent.remoteAddr", connCurrent.remoteAddr)
-	log.Println("connCurrent.connForward", connCurrent.connForward)
-	log.Println("connCurrent.OpenConn", connCurrent.OpenConn)
+	logs.Logger.Debug("connCurrent", connCurrent)
+	logs.Logger.Debug("connCurrent.sAddr", connCurrent.sAddr)
+	logs.Logger.Debug("connCurrent.localAddr", connCurrent.localAddr)
+	logs.Logger.Debug("connCurrent.remoteAddr", connCurrent.remoteAddr)
+	logs.Logger.Debug("connCurrent.connForward", connCurrent.connForward)
+	logs.Logger.Debug("connCurrent.OpenConn", connCurrent.OpenConn)
 
-	log.Println("Client range :", len(sbc.clients))
-	log.Println(sbc.clients)
+	logs.Logger.Debug("Client range :", len(sbc.clients))
+	logs.Logger.Debug(sbc.clients)
 	var c Client
 	// var lport string
 	for key, val := range sbc.clients {
@@ -288,33 +289,33 @@ func (sbc *Sbc) ConnectToMO(port string) {
 			break
 		}
 	}
-	log.Println("c", c)
-	log.Println("c.sAddr", c.sAddr)
-	log.Println("c.localAddr", c.localAddr)
-	log.Println("c.remoteAddr", c.remoteAddr)
-	log.Println("c.connForward", c.connForward)
-	log.Println("c.OpenConn", c.OpenConn)
+	logs.Logger.Debug("c", c)
+	logs.Logger.Debug("c.sAddr", c.sAddr)
+	logs.Logger.Debug("c.localAddr", c.localAddr)
+	logs.Logger.Debug("c.remoteAddr", c.remoteAddr)
+	logs.Logger.Debug("c.connForward", c.connForward)
+	logs.Logger.Debug("c.OpenConn", c.OpenConn)
 
-	log.Println("c.LocalAddr:", c.localAddr)
+	logs.Logger.Debug("c.LocalAddr:", c.localAddr)
 	if c.localAddr == nil {
 		return
 	}
 
 	localIp := conf.Conf.Localip
-	log.Println("localIp", localIp)
+	logs.Logger.Debug("localIp", localIp)
 	LocalAddr, err := net.ResolveUDPAddr("udp", localIp+":"+port)
 	if err != nil {
-		fmt.Println("Error: ", err)
+		logs.Logger.Debug("Error: ", err)
 	}
 
 	ServerAddr, err := net.ResolveUDPAddr("udp", c.remoteAddr)
 	if err != nil {
-		fmt.Println("Error: ", err)
+		logs.Logger.Debug("Error: ", err)
 	}
 
 	ConnRemote, err := net.DialUDP("udp", LocalAddr, ServerAddr)
 	if err != nil {
-		fmt.Println("Error: ", err)
+		logs.Logger.Debug("Error: ", err)
 	}
 
 	connCurrent.OpenConn = ConnRemote
@@ -333,14 +334,14 @@ func (sbc *Sbc) ConnectToMO(port string) {
 func (sbc *Sbc) sendTo(port string, p []byte) {
 	// sbc.findSender(conn)
 	conn := sbc.clients[port]
-	log.Println("conn", conn)
-	log.Println("conn.sAddr", conn.sAddr)
-	log.Println("conn.localAddr", conn.localAddr)
-	log.Println("conn.remoteAddr", conn.remoteAddr)
-	log.Println("conn.connForward", conn.connForward)
-	log.Println("conn.OpenConn", conn.OpenConn)
-	log.Println("conn.OpenConn.LocalAddr()", conn.OpenConn.LocalAddr())
-	log.Println("conn.OpenConn.RemoteAddr()", conn.OpenConn.RemoteAddr())
+	logs.Logger.Debug("conn", conn)
+	logs.Logger.Debug("conn.sAddr", conn.sAddr)
+	logs.Logger.Debug("conn.localAddr", conn.localAddr)
+	logs.Logger.Debug("conn.remoteAddr", conn.remoteAddr)
+	logs.Logger.Debug("conn.connForward", conn.connForward)
+	logs.Logger.Debug("conn.OpenConn", conn.OpenConn)
+	logs.Logger.Debug("conn.OpenConn.LocalAddr()", conn.OpenConn.LocalAddr())
+	logs.Logger.Debug("conn.OpenConn.RemoteAddr()", conn.OpenConn.RemoteAddr())
 
 	var c Client
 	// var lport string
@@ -351,29 +352,29 @@ func (sbc *Sbc) sendTo(port string, p []byte) {
 			break
 		}
 	}
-	log.Println("c", c)
-	log.Println("c.sAddr", c.sAddr)
-	log.Println("c.localAddr", c.localAddr)
-	log.Println("c.remoteAddr", c.remoteAddr)
-	log.Println("c.connForward", c.connForward)
-	log.Println("c.OpenConn", c.OpenConn)
+	logs.Logger.Debug("c", c)
+	logs.Logger.Debug("c.sAddr", c.sAddr)
+	logs.Logger.Debug("c.localAddr", c.localAddr)
+	logs.Logger.Debug("c.remoteAddr", c.remoteAddr)
+	logs.Logger.Debug("c.connForward", c.connForward)
+	logs.Logger.Debug("c.OpenConn", c.OpenConn)
 
 	if c.OpenConn == nil {
 		return
 	}
 
-	log.Println("c.OpenConn.LocalAddr()", c.OpenConn.LocalAddr())
-	log.Println("c.OpenConn.RemoteAddr()", c.OpenConn.RemoteAddr())
+	logs.Logger.Debug("c.OpenConn.LocalAddr()", c.OpenConn.LocalAddr())
+	logs.Logger.Debug("c.OpenConn.RemoteAddr()", c.OpenConn.RemoteAddr())
 
-	log.Println("sbc.handler", sbc.handler)
+	logs.Logger.Debug("sbc.handler", sbc.handler)
 	if sbc.handler == "MO" && c.sAddr != nil {
 		// defer c.OpenConn.Close()
 		n, err := c.OpenConn.WriteTo(p, c.sAddr)
 		if err != nil {
-			log.Println("Couldn't send response", c.sAddr, err)
+			logs.Logger.Debug("Couldn't send response", c.sAddr, err)
 		}
 		// log.Println("Send to : %s --> %s", c.OpenConn.LocalAddr().String(), c.OpenConn.RemoteAddr().String())
-		log.Println(n, err)
+		logs.Logger.Debug(n, err)
 	} else if sbc.handler == "MT" && c.sAddr != nil {
 		// defer c.OpenConn.Close()
 		if c.isclient {
@@ -383,14 +384,14 @@ func (sbc *Sbc) sendTo(port string, p []byte) {
 				log.Println("Couldn't send response", c.sAddr, err)
 			}
 			// log.Println("Send to : %s --> %s", c.OpenConn.LocalAddr().String(), c.OpenConn.RemoteAddr().String())
-			log.Println(n, err)
+			logs.Logger.Debug(n, err)
 		} else {
 			n, err := c.OpenConn.WriteTo(p, c.sAddr)
 			if err != nil {
 				log.Println("Couldn't send response", c.sAddr, err)
 			}
 			// log.Println("Send to : %s --> %s", c.OpenConn.LocalAddr().String(), c.OpenConn.RemoteAddr().String())
-			log.Println(n, err)
+			logs.Logger.Debug(n, err)
 		}
 
 	}

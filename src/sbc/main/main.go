@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	logs.Logger.Info("Start server at:")
+
 	// log.WithFields(log.Fields{}).Info("A group of walrus emerges from the ocean")
 
 	// log.WithFields(log.Fields{}).Warn("The group's number increased tremendously!")
@@ -37,6 +37,8 @@ func main() {
 	m.Post("/p-SSF/1.0.0/SBC/ResourceAllocate2/:uid", httpControl.TestClient2)
 	m.Post("/p-SSF/1.0.0/SBC/ResourceUnAllocate/:uid", httpControl.UnResoreceAllocate1)
 	fmt.Println("Base URL: localhost:" + config.HttpPort)
+	logs.Logger.Debug("Start server at: localhost:", config.HttpPort)
+
 	fmt.Println(http.ListenAndServe(":"+config.HttpPort, m))
 
 }

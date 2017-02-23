@@ -3,10 +3,10 @@ package httpControl
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"math/rand"
 	"net"
 	"net/http"
+	"sbc/logs"
 	"strings"
 	"time"
 
@@ -48,7 +48,6 @@ var keyStore = "sbc001"
 
 func TestFlow(w http.ResponseWriter, r *http.Request, session sessions.Session, ps martini.Params) {
 
-	log.SetFlags(log.Lshortfile)
 	fmt.Fprintf(w, "hello, %s!\n", ps["portgu"])
 
 	DoUDP("MO:uID2x0Xnpj", "MO", "127.0.0.1:7078", "61294")
@@ -62,16 +61,16 @@ func TestFlow(w http.ResponseWriter, r *http.Request, session sessions.Session, 
 }
 
 func DoUDP(session, handler, oldPort, port string) {
-	log.SetFlags(log.Lshortfile)
+	// log.SetFlags(log.Lshortfile)
 
 	keyStore = session
 	value, err := scn.Fetch(keyStore)
 	if err != nil {
-		log.Println(err)
+		logs.Logger.Debug(err)
 		value = NewSBCServer()
 	}
 	sbc := value.(*Sbc)
-	log.Println(sbc)
+	logs.Logger.Debug(sbc)
 	sbc.handler = handler
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -81,30 +80,30 @@ func DoUDP(session, handler, oldPort, port string) {
 
 	}(&wg)
 	wg.Wait()
-	log.Println("UPDServer : ", sbc)
-	log.Println("SBC Clients:", sbc.clients)
+	logs.Logger.Debug("UPDServer : ", sbc)
+	logs.Logger.Debug("SBC Clients:", sbc.clients)
 	for key, val := range sbc.clients {
-		log.Println("sbc.Client", key, val)
+		logs.Logger.Debug("sbc.Client", key, val)
 	}
 
 	errStore := scn.Store(keyStore, sbc)
 	if errStore != nil {
-		log.Println(errStore)
+		logs.Logger.Debug(errStore)
 	}
 }
 
 func Hello(w http.ResponseWriter, r *http.Request, session sessions.Session, ps martini.Params) {
 
-	log.SetFlags(log.Lshortfile)
+	// log.SetFlags(log.Lshortfile)
 	fmt.Fprintf(w, "hello, %s!\n", ps["portgu"])
 
 	value, err := scn.Fetch(keyStore)
 	if err != nil {
-		log.Println(err)
+		logs.Logger.Debug(err)
 		value = NewSBCServer()
 	}
 	sbc := value.(*Sbc)
-	log.Println(sbc)
+	logs.Logger.Debug(sbc)
 	var wg sync.WaitGroup
 	// var sbc *Sbc
 	port := ps["portgu"]
@@ -116,15 +115,15 @@ func Hello(w http.ResponseWriter, r *http.Request, session sessions.Session, ps 
 
 	}(&wg)
 	wg.Wait()
-	log.Println("UPDServer : ", sbc)
-	log.Println("SBC Clients:", sbc.clients)
+	logs.Logger.Debug("UPDServer : ", sbc)
+	logs.Logger.Debug("SBC Clients:", sbc.clients)
 	for key := range sbc.clients {
-		log.Println("sbc.Client: ", sbc.clients[key].addr)
+		logs.Logger.Debug("sbc.Client: ", sbc.clients[key].addr)
 	}
 
 	errStore := scn.Store(keyStore, sbc)
 	if errStore != nil {
-		log.Println(errStore)
+		logs.Logger.Debug(errStore)
 	}
 
 }
@@ -132,13 +131,13 @@ func Hello(w http.ResponseWriter, r *http.Request, session sessions.Session, ps 
 func DeleteWTF(w http.ResponseWriter, r *http.Request, session sessions.Session, ps martini.Params) {
 
 	fmt.Fprintf(w, "delete, %s!\n", ps["delete"])
-	fmt.Println("Delete Handler")
+	logs.Logger.Debug("Delete Handler")
 	value, err := scn.Fetch(keyStore)
 	if err != nil {
-		log.Println(err)
+		logs.Logger.Debug(err)
 	}
 	sbc := value.(*Sbc)
-	fmt.Println(keyStore, sbc)
+	logs.Logger.Debug(keyStore, sbc)
 
 	// log.Println("SBC Clients:", sbc.portOpened)
 	// for key := range sbc.clients {
@@ -153,14 +152,14 @@ func Lists(w http.ResponseWriter, r *http.Request, session sessions.Session, ps 
 	fmt.Fprintf(w, "Show list PortUDP already\n")
 	value, err := scn.Fetch(keyStore)
 	if err != nil {
-		log.Println(err)
+		logs.Logger.Debug(err)
 	}
 	sbc := value.(*Sbc)
-	fmt.Println(keyStore, sbc)
+	logs.Logger.Debug(keyStore, sbc)
 
-	log.Println("SBC Clients:", sbc.clients)
+	logs.Logger.Debug("SBC Clients:", sbc.clients)
 	for key := range sbc.clients {
-		log.Println("sbc.Client: ", sbc.clients[key].addr)
+		logs.Logger.Debug("sbc.Client: ", sbc.clients[key].addr)
 	}
 
 }
@@ -179,12 +178,12 @@ func TestClient(w http.ResponseWriter, r *http.Request, session sessions.Session
 	}
 	defer r.Body.Close()
 
-	log.Println("SDP Encode: ", sdp.SDP)
-	log.Println("SDP X-Session: ", sdp.XSession)
-	log.Println("SDP result code: ", sdp.Resultcode)
-	log.Println("SDP dev msg code: ", sdp.Deverlopermessage)
+	logs.Logger.Debug("SDP Encode: ", sdp.SDP)
+	logs.Logger.Debug("SDP X-Session: ", sdp.XSession)
+	logs.Logger.Debug("SDP result code: ", sdp.Resultcode)
+	logs.Logger.Debug("SDP dev msg code: ", sdp.Deverlopermessage)
 
-	log.Println("Send request To P-WRTC ", sdp.CallbackAddr)
+	logs.Logger.Debug("Send request To P-WRTC ", sdp.CallbackAddr)
 	ccri := msg.ConstructCCR_I(sdp.CallbackSession)
 
 	an, errhttp := RequestHTTTP(sdp.CallbackAddr+"/CCR-I/"+sdp.CallbackSession+"?", ccri)
@@ -193,8 +192,8 @@ func TestClient(w http.ResponseWriter, r *http.Request, session sessions.Session
 		return
 	}
 
-	log.Println("Recieve response from P-WRTC")
-	log.Println("Data: ", an)
+	logs.Logger.Debug("Recieve response from P-WRTC")
+	logs.Logger.Debug("Data: ", an)
 
 	var aport string
 	var vport string
@@ -216,12 +215,12 @@ func TestClient(w http.ResponseWriter, r *http.Request, session sessions.Session
 
 	//decode base64
 	desdp, _ := b64.StdEncoding.DecodeString(sdp.SDP)
-	log.Println("SDP Decode: ", string(desdp))
+	logs.Logger.Debug("SDP Decode: ", string(desdp))
 	mediaDesc := SdpParser(desdp, aport, vport)
-	log.Println(mediaDesc.ip)
+	logs.Logger.Debug(mediaDesc.ip)
 
-	log.Println("Old port: ", mediaDesc.audio.port)
-	log.Println("New port: ", aport)
+	logs.Logger.Debug("Old port: ", mediaDesc.audio.port)
+	logs.Logger.Debug("New port: ", aport)
 	s := string(desdp)
 	oip := mediaDesc.ip
 	oldport := strconv.Itoa(mediaDesc.audio.port)
@@ -229,7 +228,7 @@ func TestClient(w http.ResponseWriter, r *http.Request, session sessions.Session
 	newSdp = strings.Replace(newSdp, "c=IN IP4 "+oip, "c=IN IP4 "+conf.Conf.Localip, -1)
 	//	c=IN IP4 192.168.0.32
 
-	log.Println("New sdp: ", newSdp)
+	logs.Logger.Debug("New sdp: ", newSdp)
 	//start RTP
 
 	ss := strings.Split(sdp.CallbackSession, ":")
@@ -269,10 +268,10 @@ func TestClient2(w http.ResponseWriter, r *http.Request, session sessions.Sessio
 	}
 	defer r.Body.Close()
 
-	log.Println("SDP Encode: ", sdp.SDP)
-	log.Println("SDP X-Session: ", sdp.XSession)
+	logs.Logger.Debug("SDP Encode: ", sdp.SDP)
+	logs.Logger.Debug("SDP X-Session: ", sdp.XSession)
 
-	log.Println("Send request To P-WRTC ", sdp.CallbackAddr)
+	logs.Logger.Debug("Send request To P-WRTC ", sdp.CallbackAddr)
 	//	ccri := msg.ConstructCCR_I()
 
 	//	an := RequestHTTTP(sdp.CallbackAddr, ccri)
@@ -299,19 +298,19 @@ func TestClient2(w http.ResponseWriter, r *http.Request, session sessions.Sessio
 
 	//decode base64
 	desdp, _ := b64.StdEncoding.DecodeString(sdp.SDP)
-	log.Println("SDP Decode: ", string(desdp))
+	logs.Logger.Debug("SDP Decode: ", string(desdp))
 	mediaDesc := SdpParser(desdp, aport, vport)
 
-	log.Println("Old port: ", mediaDesc.audio.port)
-	log.Println("New port: ", aport)
+	logs.Logger.Debug("Old port: ", mediaDesc.audio.port)
+	logs.Logger.Debug("New port: ", aport)
 	s := string(desdp)
 	oip := mediaDesc.ip
 	oldport := strconv.Itoa(mediaDesc.audio.port)
 	newSdp := strings.Replace(s, oldport, aport, -1)
 	newSdp = strings.Replace(newSdp, "c=IN IP4 "+oip, "c=IN IP4 "+conf.Conf.Localip, -1)
 
-	log.Println(mediaDesc.ip)
-	log.Println(newSdp)
+	logs.Logger.Debug(mediaDesc.ip)
+	logs.Logger.Debug(newSdp)
 
 	//start RTP
 
@@ -340,22 +339,22 @@ func TestClient2(w http.ResponseWriter, r *http.Request, session sessions.Sessio
 
 func rtpMapping(session, handler, uri, port string) {
 
-	log.SetFlags(log.Lshortfile)
+	// log.SetFlags(log.Lshortfile)
 	value, err := scn.Fetch(session)
 	if err != nil {
-		log.Println(err)
+		logs.Logger.Debug(err)
 		value = NewSBCServer()
 	}
 
 	sbc := value.(*Sbc)
-	log.Println("Session get ", session, sbc)
+	logs.Logger.Debug("Session get ", session, sbc)
 
 	sbc.handler = handler
 	for key := range sbc.clients {
-		log.Println("KeyName:", key, sbc.clients[key].addr)
+		logs.Logger.Debug("KeyName:", key, sbc.clients[key].addr)
 
 	}
-	log.Println(sbc)
+	logs.Logger.Debug(sbc)
 	var wg sync.WaitGroup
 	// var sbc *Sbc
 
@@ -367,18 +366,18 @@ func rtpMapping(session, handler, uri, port string) {
 
 	}(&wg)
 	wg.Wait()
-	log.Println("UPDServer : ", sbc)
-	log.Println("SBC Clients:", sbc.clients)
+	logs.Logger.Debug("UPDServer : ", sbc)
+	logs.Logger.Debug("SBC Clients:", sbc.clients)
 	for key := range sbc.clients {
-		log.Println("sbc.Client: ", sbc.clients[key].addr)
+		logs.Logger.Debug("sbc.Client: ", sbc.clients[key].addr)
 	}
 
 	errStore := scn.Store(session, sbc)
 	if errStore != nil {
-		log.Println(errStore)
+		logs.Logger.Debug(errStore)
 	}
 
-	log.Println("Session increment ", session, sbc)
+	logs.Logger.Debug("Session increment ", session, sbc)
 }
 func UnResoreceAllocate1(w http.ResponseWriter, r *http.Request, session sessions.Session, ps martini.Params) {
 
@@ -390,12 +389,12 @@ func UnResoreceAllocate1(w http.ResponseWriter, r *http.Request, session session
 	}
 	defer r.Body.Close()
 
-	log.Println("SDP Encode: ", sdp.SDP)
-	log.Println("SDP X-Session: ", sdp.XSession)
-	log.Println("SDP result code: ", sdp.Resultcode)
-	log.Println("SDP dev msg code: ", sdp.Deverlopermessage)
+	logs.Logger.Debug("SDP Encode: ", sdp.SDP)
+	logs.Logger.Debug("SDP X-Session: ", sdp.XSession)
+	logs.Logger.Debug("SDP result code: ", sdp.Resultcode)
+	logs.Logger.Debug("SDP dev msg code: ", sdp.Deverlopermessage)
 
-	log.Println("Send request To P-WRTC ", sdp.CallbackAddr)
+	logs.Logger.Debug("Send request To P-WRTC ", sdp.CallbackAddr)
 	ccrt := msg.ConstructCCR_T(sdp.CallbackSession)
 
 	an, errhttp := RequestHTTTP(sdp.CallbackAddr+"/CCR-T/"+sdp.CallbackSession+"?", ccrt)
@@ -404,14 +403,14 @@ func UnResoreceAllocate1(w http.ResponseWriter, r *http.Request, session session
 		return
 	}
 
-	log.Println("Recieve response from P-WRTC")
-	log.Println("Data: ", an)
+	logs.Logger.Debug("Recieve response from P-WRTC")
+	logs.Logger.Debug("Data: ", an)
 
 	//start RTP
-	log.Println("Delete Handler")
+	logs.Logger.Debug("Delete Handler")
 	value, err := scn.Fetch(sdp.CallbackAddr + sdp.CallbackSession)
 	if err != nil {
-		log.Println(err)
+		logs.Logger.Debug(err)
 	}
 	sbc := value.(*Sbc)
 	// log.Println("SBC Clients:", sbc.portOpened)
@@ -433,7 +432,7 @@ func UnResoreceAllocate1(w http.ResponseWriter, r *http.Request, session session
 		Deverlopermessage: "OK"}
 
 	res2B, _ := json.Marshal(sdpRes)
-	fmt.Println(string(res2B))
+	logs.Logger.Debug(string(res2B))
 	fmt.Fprintf(w, string(res2B))
 }
 func UnResoreceAllocate2(w http.ResponseWriter, r *http.Request, session sessions.Session, ps martini.Params) {
@@ -449,10 +448,10 @@ func UnResoreceAllocate2(w http.ResponseWriter, r *http.Request, session session
 	}
 	defer r.Body.Close()
 
-	log.Println("SDP Encode: ", sdp.SDP)
-	log.Println("SDP X-Session: ", sdp.XSession)
+	logs.Logger.Debug("SDP Encode: ", sdp.SDP)
+	logs.Logger.Debug("SDP X-Session: ", sdp.XSession)
 
-	log.Println("Send request To P-WRTC ", sdp.CallbackAddr)
+	logs.Logger.Debug("Send request To P-WRTC ", sdp.CallbackAddr)
 	//	ccri := msg.ConstructCCR_I()
 
 	//	an := RequestHTTTP(sdp.CallbackAddr, ccri)
@@ -470,27 +469,27 @@ func UnResoreceAllocate2(w http.ResponseWriter, r *http.Request, session session
 		_, aerr := net.ResolveUDPAddr("udp", ":"+aport)
 		_, verr := net.ResolveUDPAddr("udp", ":"+vport)
 		if aerr == nil && verr == nil {
-			log.Println("new audio port:", aport)
-			log.Println("new video port:", vport)
+			logs.Logger.Debug("new audio port:", aport)
+			logs.Logger.Debug("new video port:", vport)
 			break
 		}
 	}
 
 	//decode base64
 	desdp, _ := b64.StdEncoding.DecodeString(sdp.SDP)
-	log.Println("SDP Decode: ", string(desdp))
+	logs.Logger.Debug("SDP Decode: ", string(desdp))
 	mediaDesc := SdpParser(desdp, aport, vport)
 
-	log.Println("Old port: ", mediaDesc.audio.port)
-	log.Println("New port: ", aport)
+	logs.Logger.Debug("Old port: ", mediaDesc.audio.port)
+	logs.Logger.Debug("New port: ", aport)
 	s := string(desdp)
 	oip := mediaDesc.ip
 	oldport := strconv.Itoa(mediaDesc.audio.port)
 	newSdp := strings.Replace(s, oldport, aport, -1)
 	newSdp = strings.Replace(newSdp, "c=IN IP4 "+oip, "c=IN IP4 "+conf.Conf.Localip, -1)
 
-	log.Println(mediaDesc.ip)
-	log.Println(newSdp)
+	logs.Logger.Debug(mediaDesc.ip)
+	logs.Logger.Debug(newSdp)
 
 	//start RTP
 
@@ -509,13 +508,13 @@ func UnResoreceAllocate2(w http.ResponseWriter, r *http.Request, session session
 		Resultcode:        "200",
 		Deverlopermessage: "OK"}
 	res2B, _ := json.Marshal(sdpRes)
-	fmt.Println(string(res2B))
+	logs.Logger.Debug(string(res2B))
 	fmt.Fprintf(w, string(res2B))
 }
 func Ccru() {
 	for {
 		time.Sleep(10 * time.Second)
-		fmt.Println("Hello")
+		logs.Logger.Debug("Hello")
 
 	}
 

@@ -1,10 +1,10 @@
 package httpControl
 
 import (
-	"log"
 	"net"
 
 	conf "sbc/conf"
+	"sbc/logs"
 
 	//	"io/ioutil"
 
@@ -20,7 +20,7 @@ func SdpParser(sdpByte []byte, aport, vport string) OriginSdp {
 	)
 
 	if s, err = sdp.DecodeSession(sdpByte, s); err != nil {
-		log.Fatal("err:", err)
+		logs.Logger.Debug("err:", err)
 	}
 	// for k, v := range s {
 	// 	fmt.Println(k, v)
@@ -28,18 +28,18 @@ func SdpParser(sdpByte []byte, aport, vport string) OriginSdp {
 	d := sdp.NewDecoder(s)
 	m := new(sdp.Message)
 	if err = d.Decode(m); err != nil {
-		log.Fatal("err:", err)
+		logs.Logger.Debug("err:", err)
 	}
-	log.Println("Decoded session", m.Name)
-	log.Println("Info:", m.Info)
-	log.Println("Origin:", m.Origin)
-	log.Println("IP 4: ", m.Origin.Address)
-	log.Println("IP 4: ", m.Timing)
-	log.Println("NetworkType: ", m.Connection.NetworkType)
-	log.Println("AddressType: ", m.Connection.AddressType)
-	log.Println("IP: ", m.Connection.IP)
-	log.Println("TTL: ", m.Connection.TTL)
-	log.Println("Addresses: ", m.Connection.Addresses)
+	logs.Logger.Debug("Decoded session", m.Name)
+	logs.Logger.Debug("Info:", m.Info)
+	logs.Logger.Debug("Origin:", m.Origin)
+	logs.Logger.Debug("IP 4: ", m.Origin.Address)
+	logs.Logger.Debug("IP 4: ", m.Timing)
+	logs.Logger.Debug("NetworkType: ", m.Connection.NetworkType)
+	logs.Logger.Debug("AddressType: ", m.Connection.AddressType)
+	logs.Logger.Debug("IP: ", m.Connection.IP)
+	logs.Logger.Debug("TTL: ", m.Connection.TTL)
+	logs.Logger.Debug("Addresses: ", m.Connection.Addresses)
 
 	orig := OriginSdp{}
 	medias1 := sdp.Medias{}
@@ -49,16 +49,16 @@ func SdpParser(sdpByte []byte, aport, vport string) OriginSdp {
 	isMultiMediaVideo := false
 	// var isRemove []int
 	for i, media := range m.Medias {
-		log.Println("=======================")
-		log.Println("Type: ", media.Description.Type)
-		log.Println("Port: ", media.Description.Port)
-		log.Println("PortsNumber: ", media.Description.PortsNumber)
-		log.Println("Protocol: ", media.Description.Protocol)
-		log.Println("Format: ", media.Description.Format)
-		log.Println("Medias Connection: ", media.Connection)
-		log.Println("Medias Attributes: ", media.Attributes)
-		log.Println("Medias Encryption: ", media.Encryption)
-		log.Println("Medias Bandwidths: ", media.Bandwidths)
+		logs.Logger.Debug("=======================")
+		logs.Logger.Debug("Type: ", media.Description.Type)
+		logs.Logger.Debug("Port: ", media.Description.Port)
+		logs.Logger.Debug("PortsNumber: ", media.Description.PortsNumber)
+		logs.Logger.Debug("Protocol: ", media.Description.Protocol)
+		logs.Logger.Debug("Format: ", media.Description.Format)
+		logs.Logger.Debug("Medias Connection: ", media.Connection)
+		logs.Logger.Debug("Medias Attributes: ", media.Attributes)
+		logs.Logger.Debug("Medias Encryption: ", media.Encryption)
+		logs.Logger.Debug("Medias Bandwidths: ", media.Bandwidths)
 
 		switch media.Description.Type {
 		case "audio":
@@ -107,7 +107,7 @@ func ConstructSdp(me *sdp.Message) string {
 
 	// appending session to byte buffer
 	b = s.AppendTo(b)
-	log.Println("SDP Construct :", string(b)+"\n")
+	logs.Logger.Debug("SDP Construct :", string(b)+"\n")
 	return string(b) + "\n"
 }
 

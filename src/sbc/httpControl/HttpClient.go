@@ -10,8 +10,8 @@ import (
 	// "fmt"
 	// "github.com/jmcvetta/napping"
 	// "gopkg.in/jmcvetta/napping.v3"
-	"log"
 	"net/http"
+	"sbc/logs"
 )
 
 func RequestHTTTP(host, data string) (string, error) {
@@ -31,10 +31,10 @@ func RequestHTTTP(host, data string) (string, error) {
 	}
 	defer resp.Body.Close()
 
-	log.Println("response Status:", resp.Status)
-	log.Println("response Headers:", resp.Header)
+	logs.Logger.Debug("response Status:", resp.Status)
+	logs.Logger.Debug("response Headers:", resp.Header)
 	body, _ := ioutil.ReadAll(resp.Body)
-	log.Println("response Body:", string(body))
+	logs.Logger.Debug("response Body:", string(body))
 
 	return string(body), nil
 }
