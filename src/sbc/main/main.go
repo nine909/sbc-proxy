@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 	"net/http"
-
+	"sbc/logs"
+	// "os"
 	"sbc/conf"
-
 	"sbc/httpControl"
 
 	"github.com/go-martini/martini"
@@ -13,6 +13,13 @@ import (
 )
 
 func main() {
+	logs.Logger.Info("Start server at:")
+	// log.WithFields(log.Fields{}).Info("A group of walrus emerges from the ocean")
+
+	// log.WithFields(log.Fields{}).Warn("The group's number increased tremendously!")
+
+	// log.WithFields(log.Fields{}).Fatal("The ice breaks!")
+
 	config := conf.ReadConfig()
 
 	m := martini.Classic()
