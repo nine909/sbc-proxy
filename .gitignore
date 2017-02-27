@@ -4,4 +4,4 @@ bin/*
 pkg/*
 src/sbc/demo/*
 ~$*
-vendor/*
+vendor/src/*

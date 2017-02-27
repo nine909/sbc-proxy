@@ -1,0 +1,132 @@
+{
+	"version": 0,
+	"dependencies": [
+		{
+			"importpath": "github.com/BurntSushi/toml",
+			"repository": "https://github.com/BurntSushi/toml",
+			"revision": "99064174e013895bbd9b025c31100bd1d9b590ca",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/Sirupsen/logrus",
+			"repository": "https://github.com/Sirupsen/logrus",
+			"revision": "7f4b1adc791766938c29457bed0703fb9134421a",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/boj/redistore",
+			"repository": "https://github.com/boj/redistore",
+			"revision": "fc113767cd6b051980f260d6dbe84b2740c46ab0",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/cihub/seelog",
+			"repository": "https://github.com/cihub/seelog",
+			"revision": "f561c5e57575bb1e0a2167028b7339b3a8d16fb4",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/codegangsta/inject",
+			"repository": "https://github.com/codegangsta/inject",
+			"revision": "33e0aa1cb7c019ccc3fbe049a8262a6403d30504",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/ernado/sdp",
+			"repository": "https://github.com/ernado/sdp",
+			"revision": "43b85ad77caf66f9a964128da8c6c22aee23c1bb",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/garyburd/redigo/internal",
+			"repository": "https://github.com/garyburd/redigo",
+			"revision": "0d253a66e6e1349f4581d6d2b300ee434ee2da9f",
+			"branch": "master",
+			"path": "/internal"
+		},
+		{
+			"importpath": "github.com/garyburd/redigo/redis",
+			"repository": "https://github.com/garyburd/redigo",
+			"revision": "0d253a66e6e1349f4581d6d2b300ee434ee2da9f",
+			"branch": "master",
+			"path": "/redis"
+		},
+		{
+			"importpath": "github.com/go-martini/martini",
+			"repository": "https://github.com/go-martini/martini",
+			"revision": "22fa46961aabd2665cf3f1343b146d20028f5071",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/gorilla/context",
+			"repository": "https://github.com/gorilla/context",
+			"revision": "08b5f424b9271eedf6f9f0ce86cb9396ed337a42",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/gorilla/securecookie",
+			"repository": "https://github.com/gorilla/securecookie",
+			"revision": "e59506cc896acb7f7bf732d4fdf5e25f7ccd8983",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/gorilla/sessions",
+			"repository": "https://github.com/gorilla/sessions",
+			"revision": "803ac3201723cc018469e5db5dc341b501dd8b21",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/martini-contrib/sessions",
+			"repository": "https://github.com/martini-contrib/sessions",
+			"revision": "fa13114fbcf036dff8185d728651d85fcef772db",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/tideland/golib/errors",
+			"repository": "https://github.com/tideland/golib",
+			"revision": "096a95cf2d008f4428efd35bdfa09749d258a1aa",
+			"branch": "master",
+			"path": "/errors"
+		},
+		{
+			"importpath": "github.com/tideland/golib/identifier",
+			"repository": "https://github.com/tideland/golib",
+			"revision": "096a95cf2d008f4428efd35bdfa09749d258a1aa",
+			"branch": "master",
+			"path": "/identifier"
+		},
+		{
+			"importpath": "github.com/tideland/golib/logger",
+			"repository": "https://github.com/tideland/golib",
+			"revision": "096a95cf2d008f4428efd35bdfa09749d258a1aa",
+			"branch": "master",
+			"path": "/logger"
+		},
+		{
+			"importpath": "github.com/tideland/golib/loop",
+			"repository": "https://github.com/tideland/golib",
+			"revision": "096a95cf2d008f4428efd35bdfa09749d258a1aa",
+			"branch": "master",
+			"path": "/loop"
+		},
+		{
+			"importpath": "github.com/tideland/golib/scene",
+			"repository": "https://github.com/tideland/golib",
+			"revision": "096a95cf2d008f4428efd35bdfa09749d258a1aa",
+			"branch": "master",
+			"path": "/scene"
+		},
+		{
+			"importpath": "gopkg.in/airbrake/gobrake.v2",
+			"repository": "https://gopkg.in/airbrake/gobrake.v2",
+			"revision": "668876711219e8b0206e2994bf0a59d889c775aa",
+			"branch": "master"
+		},
+		{
+			"importpath": "gopkg.in/gemnasium/logrus-airbrake-hook.v2",
+			"repository": "https://gopkg.in/gemnasium/logrus-airbrake-hook.v2",
+			"revision": "bfee1239d796830ca346767650cce5ba90d58c57",
+			"branch": "master"
+		}
+	]
+}
